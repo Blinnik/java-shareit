@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.AlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.dto.UserDto;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -18,34 +19,26 @@ import java.util.List;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-    UserDao userDao;
+    UserRepository userRepository;
 
     @Override
-    public User create(User user) {
-        if (userDao.isEmailExists(user.getEmail())) {
-            throw new AlreadyExistsException("Указанный email уже существует");
-        }
-
-        User createdUser = userDao.save(user);
+    public User create(UserDto userDto) {
+        User createdUser = userRepository.save(UserMapper.toUser(userDto));
         log.info("Был добавлен новый пользователь, id={}", createdUser.getId());
 
         return createdUser;
     }
 
     @Override
-    public User update(Long userId, User user) {
-        if (userDao.notExists(userId)) {
+    public User update(Long userId, UserDto userDto) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        user.setId(userId); // Возможно, это лучше отнести на уровень ниже, в UserDao
 
-        String email = user.getEmail();
-        if (!userDao.getEmailsByUserId().get(userId).equals(email) &&
-                userDao.isEmailExists(email)) {
-            throw new AlreadyExistsException("Email " + email + " уже существует");
-        }
+        User user = UserMapper.toUser(userDto);
+        user.setId(userId);
 
-        User foundUser = getOne(userId);
+        User foundUser = getById(userId);
         if (user.getName() == null) {
             user.setName(foundUser.getName());
         }
@@ -53,15 +46,15 @@ public class UserServiceImpl implements UserService {
             user.setEmail(foundUser.getEmail());
         }
 
-        User updatedUser = userDao.update(userId, user);
+        User updatedUser = userRepository.save(user);
         log.info("Пользователь с id {} был обновлен", userId);
 
         return updatedUser;
     }
 
     @Override
-    public User getOne(Long userId) {
-        User user = userDao.findOne(userId)
+    public User getById(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
         log.info("Получен пользователь с id {}: {}", userId, user);
@@ -70,8 +63,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getMany() {
-        List<User> users = userDao.findMany();
+    public List<User> getAll() {
+        List<User> users = userRepository.findAll();
         log.info("Получен список всех пользователей");
 
         return users;
@@ -79,11 +72,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long userId) {
-        if (userDao.notExists(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        userDao.delete(userId);
+        userRepository.deleteById(userId);
         log.info("Пользователь с id {} был удален", userId);
     }
 }
