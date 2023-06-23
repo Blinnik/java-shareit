@@ -14,12 +14,12 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class ItemDto {
     Long id;
-    @Length(message = "Название предмета не может быть пустым", min = 1, groups = {
+    @Length(message = "Название предмета должно содержать от 1 до 200 символов", min = 1, max = 200, groups = {
             ValidationMarker.OnCreate.class,
             ValidationMarker.OnUpdate.class})
     @NotNull(message = "Название предмета не может отсутствовать", groups = ValidationMarker.OnCreate.class)
     String name;
-    @Length(message = "Название предмета не может быть пустым", min = 1, groups = {
+    @Length(message = "Описание предмета должно содержать от 1 до 1000 символов", min = 1, max = 1000, groups = {
             ValidationMarker.OnCreate.class,
             ValidationMarker.OnUpdate.class})
     @NotNull(message = "Описание предмета не может отсутствовать", groups = ValidationMarker.OnCreate.class)
