@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -21,6 +22,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
+    @Transactional
     @Override
     public User create(UserDto userDto) {
         User createdUser = userRepository.save(UserMapper.toUser(userDto));
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
         return createdUser;
     }
 
+    @Transactional
     @Override
     public User update(Long userId, UserDto userDto) {
         if (!userRepository.existsById(userId)) {

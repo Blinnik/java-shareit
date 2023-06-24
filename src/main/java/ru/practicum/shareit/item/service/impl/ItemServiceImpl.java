@@ -37,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     BookingRepository bookingRepository;
     CommentRepository commentRepository;
 
+    @Transactional
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
         User owner = userRepository.findById(userId)
@@ -51,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(createdItem);
     }
 
-
+    @Transactional
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         if (!userRepository.existsById(userId)) {
@@ -106,6 +107,7 @@ public class ItemServiceImpl implements ItemService {
         return itemBookingsAndCommentsDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ItemBookingsDto> getAllByOwnerId(Long userId) {
         if (!userRepository.existsById(userId)) {
@@ -125,6 +127,7 @@ public class ItemServiceImpl implements ItemService {
         return itemBookingsDtos;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> getAllByTextQuery(Long userId, String text) {
         if (!userRepository.existsById(userId)) {
@@ -149,6 +152,7 @@ public class ItemServiceImpl implements ItemService {
         return itemDtos;
     }
 
+    @Transactional
     @Override
     public void delete(Long userId, Long itemId) {
         if (!userRepository.existsById(userId)) {
@@ -166,6 +170,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Предмет с id {} был удален", itemId);
     }
 
+    @Transactional
     @Override
     public CommentDto createComment(Long userId, Long itemId, CommentTextDto commentTextDto) {
         User user = userRepository.findById(userId)

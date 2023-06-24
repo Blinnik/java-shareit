@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -38,6 +39,7 @@ public class BookingServiceImpl implements BookingService {
     UserRepository userRepository;
     QBooking qBooking = QBooking.booking;
 
+    @Transactional
     @Override
     public Booking create(Long userId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
         Long itemId = bookingItemIdAndTimeDto.getItemId();
@@ -76,6 +78,7 @@ public class BookingServiceImpl implements BookingService {
         return createdBooking;
     }
 
+    @Transactional
     @Override
     public Booking updateStatus(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -108,6 +111,7 @@ public class BookingServiceImpl implements BookingService {
         return updatedBooking;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Booking getById(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
