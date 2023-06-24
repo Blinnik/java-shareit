@@ -9,10 +9,10 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 public class BookingMapper {
-    public static Booking toBooking(Long bookerId, BookingItemIdAndTimeDto BookingItemIdAndTimeDto) {
-        Long itemId = BookingItemIdAndTimeDto.getItemId();
-        LocalDateTime start = LocalDateTime.parse(BookingItemIdAndTimeDto.getStart());
-        LocalDateTime end = LocalDateTime.parse(BookingItemIdAndTimeDto.getEnd());
+    public static Booking toBooking(Long bookerId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
+        Long itemId = bookingItemIdAndTimeDto.getItemId();
+        LocalDateTime start = LocalDateTime.parse(bookingItemIdAndTimeDto.getStart());
+        LocalDateTime end = LocalDateTime.parse(bookingItemIdAndTimeDto.getEnd());
 
         return Booking.builder()
                 .item(Item.builder().id(itemId).build())
