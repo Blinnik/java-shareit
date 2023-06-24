@@ -10,10 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.QBooking;
-import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
+import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotAvailableException;
@@ -28,6 +27,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+
+import static ru.practicum.shareit.booking.model.BookingStatus.*;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -92,17 +93,17 @@ public class BookingServiceImpl implements BookingService {
             throw new NotOwnerException("Пользователь с id " + userId + " не является владельцем вещи с id " + itemId);
         }
 
-        if (booking.getStatus().equals(BookingStatus.APPROVED) && approved ||
-                booking.getStatus().equals(BookingStatus.REJECTED) && !approved) {
+        if (booking.getStatus().equals(APPROVED) && approved ||
+                booking.getStatus().equals(REJECTED) && !approved) {
             String message = approved ? "одобрить" : "отклонить";
 
             throw new NotAvailableException("Нельзя повторно " + message + " бронь");
         }
 
         if (approved) {
-            booking.setStatus(BookingStatus.APPROVED);
+            booking.setStatus(APPROVED);
         } else {
-            booking.setStatus(BookingStatus.REJECTED);
+            booking.setStatus(REJECTED);
         }
 
         Booking updatedBooking = bookingRepository.save(booking);
@@ -196,7 +197,7 @@ public class BookingServiceImpl implements BookingService {
                 );
                 break;
             case WAITING:
-                byStatus = qBooking.status.eq(BookingStatus.WAITING);
+                byStatus = qBooking.status.eq(WAITING);
 
                 bookings = (List<Booking>) bookingRepository.findAll(
                         byId.and(byStatus),
@@ -204,7 +205,7 @@ public class BookingServiceImpl implements BookingService {
                 );
                 break;
             case REJECTED:
-                byStatus = qBooking.status.eq(BookingStatus.REJECTED);
+                byStatus = qBooking.status.eq(REJECTED);
 
                 bookings = (List<Booking>) bookingRepository.findAll(
                         byId.and(byStatus),
