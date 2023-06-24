@@ -59,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        Item foundItem = itemRepository.findById(itemId)
+        Item foundItem = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + userId + " не найден"));
 
         if (!Objects.equals(foundItem.getOwner().getId(), userId)) {
@@ -90,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     @Override
     public ItemBookingsAndCommentsDto getById(Long userId, Long itemId) {
-        Item item = itemRepository.findById(itemId)
+        Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
         List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
@@ -196,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private boolean notOwns(Long userId, Long itemId) {
-        Optional<Item> itemOpt = itemRepository.findById(itemId);
+        Optional<Item> itemOpt = itemRepository.findByIdWithOwner(itemId);
         return itemOpt.map(item -> !Objects.equals(item.getOwner().getId(), userId)).orElse(true);
     }
 }

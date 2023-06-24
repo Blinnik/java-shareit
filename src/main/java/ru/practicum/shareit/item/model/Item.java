@@ -21,10 +21,10 @@ public class Item {
     String name;
     String description;
     Boolean available;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     User owner;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     ItemRequest request;
 }

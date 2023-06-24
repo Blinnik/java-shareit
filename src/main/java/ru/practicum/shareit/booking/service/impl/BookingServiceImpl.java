@@ -43,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking create(Long userId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
         Long itemId = bookingItemIdAndTimeDto.getItemId();
-        Item item = itemRepository.findById(itemId)
+        Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
         if (!item.getAvailable()) {
@@ -81,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public Booking updateStatus(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId)
+        Booking booking = bookingRepository.findByIdWithItem(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id " + bookingId + " не найдена"));
 
         Long itemId = booking.getItem().getId();
@@ -114,7 +114,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     @Override
     public Booking getById(Long userId, Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
+        Booking booking = bookingRepository.findByIdWithItem(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id " + bookingId + " не найдена"));
 
         Long ownerId = booking.getItem().getOwner().getId();

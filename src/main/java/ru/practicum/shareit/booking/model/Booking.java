@@ -25,11 +25,11 @@ public class Booking {
     LocalDateTime start;
     @Column(name = "end_time")
     LocalDateTime end;
-    @ManyToOne
-    @JoinColumn(name = "item_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
     Item item;
-    @ManyToOne
-    @JoinColumn(name = "booker_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booker_id", nullable = false)
     User booker;
     @Enumerated(EnumType.STRING)
     @Generated(GenerationTime.INSERT) // Без аннотации DEFAULT в БД не работает
