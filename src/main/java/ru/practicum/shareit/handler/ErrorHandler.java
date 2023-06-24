@@ -42,12 +42,6 @@ public class ErrorHandler {
         return new ErrorResponse(e.getClass().getSimpleName(), "Unknown state: " + e.getValue(), HttpStatus.BAD_REQUEST);
     }
 
-    /*@ExceptionHandler(NotOwnerException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleForbiddenException(final RuntimeException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.FORBIDDEN);
-    }*/
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleServerErrorException(final Throwable e) {
