@@ -9,25 +9,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long>, QuerydslPredicateExecutor<Booking> {
-    @Query("select b " +
-            "from Booking as b " +
-            "join fetch b.item " +
-            "where b.id = ?1 ")
+    @Query("SELECT b " +
+            "FROM Booking AS b " +
+            "JOIN FETCH b.item " +
+            "WHERE b.id = ?1 ")
     Optional<Booking> findByIdWithItem(Long id);
 
-    @Query("select b " +
-            "from Booking as b " +
-            "where b.item.id = ?1 and " +
-            "(b.status = 'APPROVED' or " +
+    @Query("SELECT b " +
+            "FROM Booking AS b " +
+            "WHERE b.item.id = ?1 AND " +
+            "(b.status = 'APPROVED' OR " +
             "b.status = 'WAITING')")
     List<Booking> findAllAcceptedByItemId(Long itemId);
 
-    @Query("select count(b) " +
-            "from Booking as b " +
-            "where b.item.id = ?1 and " +
-            "b.booker.id = ?2 and " +
-            "b.end < current_time and " +
-            "(b.status = 'APPROVED' or " +
+    @Query("SELECT COUNT(b) " +
+            "FROM Booking AS b " +
+            "WHERE b.item.id = ?1 AND " +
+            "b.booker.id = ?2 AND " +
+            "b.end < CURRENT_TIME AND " +
+            "(b.status = 'APPROVED' OR " +
             "b.status = 'WAITING')")
     Integer countAllPrevious(Long itemId, Long bookerId);
 }

@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
-    @Query("select i " +
-            "from Item as i " +
-            "join fetch i.owner " +
-            "where i.id = ?1 ")
+    @Query("SELECT i " +
+            "FROM Item AS i " +
+            "JOIN FETCH i.owner " +
+            "WHERE i.id = ?1 ")
     Optional<Item> findByIdWithOwner(Long id);
 
     List<Item> findAllByOwnerId(Long ownerId);
