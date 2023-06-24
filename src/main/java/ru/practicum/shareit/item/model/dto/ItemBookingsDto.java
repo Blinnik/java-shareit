@@ -9,9 +9,14 @@ import ru.practicum.shareit.booking.model.dto.BookingBookerIdDto;
 @Data
 public class ItemBookingsDto {
     Long id;
+
     String name;
+
     String description;
+
     Boolean available;
+
     BookingBookerIdDto lastBooking;
+
     BookingBookerIdDto nextBooking;
 }

@@ -16,8 +16,11 @@ public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     String description;
+
     @ManyToOne
     User requester;
+
     Instant created;
 }

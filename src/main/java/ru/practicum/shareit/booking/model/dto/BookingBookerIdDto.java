@@ -8,5 +8,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 public class BookingBookerIdDto {
     Long id;
+
     Long bookerId;
 }

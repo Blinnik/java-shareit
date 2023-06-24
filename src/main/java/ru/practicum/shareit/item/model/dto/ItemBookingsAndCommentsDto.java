@@ -11,10 +11,16 @@ import java.util.List;
 @Data
 public class ItemBookingsAndCommentsDto {
     Long id;
+
     String name;
+
     String description;
+
     Boolean available;
+
     BookingBookerIdDto lastBooking;
+
     BookingBookerIdDto nextBooking;
+
     List<CommentDto> comments;
 }

@@ -11,8 +11,10 @@ import javax.validation.constraints.NotNull;
 public class BookingItemIdAndTimeDto {
     @NotNull
     Long itemId;
+
     @NotNull
     String start;
+
     @NotNull
     String end;
 }

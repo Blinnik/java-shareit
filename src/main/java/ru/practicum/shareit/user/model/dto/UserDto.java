@@ -19,6 +19,7 @@ public class UserDto {
             ValidationMarker.OnCreate.class,
             ValidationMarker.OnUpdate.class})
     String name;
+
     @NotNull(message = "Email пользователя не может отсутствовать", groups = ValidationMarker.OnCreate.class)
     @Email(message = "Email не соответствует формату", groups = {
             ValidationMarker.OnCreate.class,

@@ -21,16 +21,21 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     @Column(name = "start_time")
     LocalDateTime start;
+
     @Column(name = "end_time")
     LocalDateTime end;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     Item item;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booker_id", nullable = false)
     User booker;
+
     @Enumerated(EnumType.STRING)
     @Generated(GenerationTime.INSERT) // Без аннотации DEFAULT в БД не работает
     BookingStatus status;
