@@ -9,8 +9,10 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotValidException;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -24,6 +26,17 @@ public class BookingController {
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @RequestBody @Valid BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
+        LocalDateTime start = LocalDateTime.parse(bookingItemIdAndTimeDto.getStart());
+        LocalDateTime end = LocalDateTime.parse(bookingItemIdAndTimeDto.getEnd());
+
+        if (start.isBefore(LocalDateTime.now())) {
+            throw new NotValidException("Время начала брони не может быть в прошлом");
+        } else if (end.isBefore(start)) {
+            throw new NotValidException("Время конца брони не может быть раньше времени начала");
+        } else if (end.equals(start)) {
+            throw new NotValidException("Время конца брони не может совпадать с временем начала");
+        }
+
         return bookingService.create(userId, bookingItemIdAndTimeDto);
     }
 

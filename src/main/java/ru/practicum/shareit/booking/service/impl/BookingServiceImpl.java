@@ -63,16 +63,6 @@ public class BookingServiceImpl implements BookingService {
         booking.setItem(item);
         booking.setBooker(booker);
 
-        LocalDateTime start = booking.getStart();
-        LocalDateTime end = booking.getEnd();
-        if (start.isBefore(LocalDateTime.now())) {
-            throw new NotValidException("Время начала брони не может быть в прошлом");
-        } else if (end.isBefore(start)) {
-            throw new NotValidException("Время конца брони не может быть раньше времени начала");
-        } else if (end.equals(start)) {
-            throw new NotValidException("Время конца брони не может совпадать с временем начала");
-        }
-
         Booking createdBooking = bookingRepository.save(booking);
         log.info("Была добавлена бронь, id={}", createdBooking.getId());
 
