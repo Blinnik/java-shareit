@@ -24,26 +24,24 @@ public class UserController {
     @PostMapping
     @Validated(ValidationMarker.OnCreate.class)
     public User create(@RequestBody @Valid UserDto userDto) {
-        return userService.create(UserMapper.toUser(userDto));
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{userId}")
     @Validated(ValidationMarker.OnUpdate.class)
     public User update(@PathVariable Long userId,
                        @RequestBody @Valid UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        user.setId(userId);
-        return userService.update(userId, user);
+        return userService.update(userId, userDto);
     }
 
     @GetMapping("/{userId}")
-    public User getOne(@PathVariable Long userId) {
-        return userService.getOne(userId);
+    public User getById(@PathVariable Long userId) {
+        return userService.getById(userId);
     }
 
     @GetMapping
-    public List<User> getMany() {
-        return userService.getMany();
+    public List<User> getAll() {
+        return userService.getAll();
     }
 
     @DeleteMapping("/{userId}")

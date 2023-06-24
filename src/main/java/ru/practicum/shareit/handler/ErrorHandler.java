@@ -6,16 +6,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.AlreadyExistsException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotOwnerException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.shareit.exception.*;
 
 import javax.validation.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler({NotFoundException.class,
+            NotOwnerException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.NOT_FOUND);
@@ -23,41 +23,43 @@ public class ErrorHandler {
 
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleAlreadyExistException(final RuntimeException e) {
+    public ErrorResponse handleConflictException(final RuntimeException e) {
         return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({ValidationException.class,
-            MethodArgumentNotValidException.class})
+            MethodArgumentNotValidException.class,
+            NotValidException.class,
+            NotAvailableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final RuntimeException e) {
+    public ErrorResponse handleBadRequestException(final RuntimeException e) {
         return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotOwnerException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleNotOwnerException(final RuntimeException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.FORBIDDEN);
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        return new ErrorResponse(e.getClass().getSimpleName(), "Unknown state: " + e.getValue(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
+    public ErrorResponse handleServerErrorException(final Throwable e) {
         return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @AllArgsConstructor
     static class ErrorResponse {
+        String errorClass;
         String error;
-        String errorMessage;
         HttpStatus responseCodeStatus;
+
+        public String getErrorClass() {
+            return errorClass;
+        }
 
         public String getError() {
             return error;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
         }
 
         public HttpStatus getResponseCodeStatus() {

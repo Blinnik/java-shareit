@@ -1,62 +1,76 @@
 package ru.practicum.shareit.item.service.impl;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.NotAvailableException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.QItem;
+import ru.practicum.shareit.item.model.dto.*;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
-    ItemDao itemDao;
-    UserDao userDao;
+    ItemRepository itemRepository;
+    UserRepository userRepository;
+    BookingRepository bookingRepository;
+    CommentRepository commentRepository;
 
+    @Transactional
     @Override
-    public Item create(Long userId, Item item) {
-        if (userDao.notExists(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+    public ItemDto create(Long userId, ItemDto itemDto) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
-        Optional<User> ownerOpt = userDao.findOne(userId);
-        ownerOpt.ifPresent(item::setOwner);
+        Item item = ItemMapper.toItem(itemDto);
+        item.setOwner(owner);
 
-        Item createdItem = itemDao.save(item);
+        Item createdItem = itemRepository.save(item);
         log.info("Был добавлен новый предмет, id={}", createdItem.getId());
 
-        return createdItem;
+        return ItemMapper.toItemDto(createdItem);
     }
 
-
+    @Transactional
     @Override
-    public Item update(Long userId, Long itemId, Item item) {
-        if (userDao.notExists(userId)) {
+    public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        if (itemDao.notExists(itemId)) {
-            throw new NotFoundException("Предмет с id " + userId + " не найден");
-        }
-        item.setId(itemId);
+        Item foundItem = itemRepository.findByIdWithOwner(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет с id " + userId + " не найден"));
 
-        if (itemDao.notOwns(userId, itemId)) {
+        if (!Objects.equals(foundItem.getOwner().getId(), userId)) {
             throw new NotOwnerException("Пользователь с id " + userId + " не является " +
                     "владельцем предмета с id " + itemId);
         }
 
-        Item foundItem = getOne(userId, itemId);
+        Item item = ItemMapper.toItem(itemDto);
+        item.setId(itemId);
+        item.setOwner(foundItem.getOwner());
+
         if (item.getName() == null) {
             item.setName(foundItem.getName());
         }
@@ -67,64 +81,123 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(foundItem.getAvailable());
         }
 
-        item.setOwner(foundItem.getOwner());
-
-        Item updatedItem = itemDao.update(itemId, item);
+        Item updatedItem = itemRepository.save(item);
         log.info("Предмет с id {} был обновлен", itemId);
 
-        return updatedItem;
+        return ItemMapper.toItemDto(updatedItem);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public Item getOne(Long userId, Long itemId) {
-        // userId тут не используется, его по идее можно убрать, но в ТЗ указано наличие в каждом методе
-        // видимо пригодится на будущее
-        Item item = itemDao.findOne(itemId)
+    public ItemBookingsAndCommentsDto getById(Long userId, Long itemId) {
+        Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
-        log.info("Получен предмет с id {}: {}", itemId, item);
+        List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
-        return item;
+        if (!Objects.equals(item.getOwner().getId(), userId)) {
+            return ItemMapper.toItemBookingsAndCommentsDto(item, comments);
+        }
+
+        ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
+                ItemMapper.toItemBookingsAndCommentsDto(item, bookings, comments);
+        log.info("Получен предмет с id {}: {}", itemId, itemBookingsAndCommentsDto);
+
+        return itemBookingsAndCommentsDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<Item> getMany(Long userId) {
-        if (userDao.notExists(userId)) {
+    public List<ItemBookingsDto> getAllByOwnerId(Long userId) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        List<Item> items = itemDao.findMany(userId);
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
+
+        List<ItemBookingsDto> itemBookingsDtos = new ArrayList<>();
+        for (Item item : items) {
+            List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(item.getId());
+            ItemBookingsDto itemBookingsDto = ItemMapper.toItemBookingsDto(item, bookings);
+            itemBookingsDtos.add(itemBookingsDto);
+        }
         log.info("Получен список всех предметов пользователя");
 
-        return items;
+        return itemBookingsDtos;
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<Item> getManyByTextQuery(Long userId, String text) {
-        if (userDao.notExists(userId)) {
+    public List<ItemDto> getAllByTextQuery(Long userId, String text) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        List<Item> items = itemDao.findManyByTextQuery(text);
+        if (text.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        BooleanExpression byAvailableTrue = QItem.item.available.isTrue();
+        BooleanExpression byNameOrDescriptionContainingText = QItem.item.name.containsIgnoreCase(text)
+                .or(QItem.item.description.containsIgnoreCase(text));
+
+        List<Item> items = (List<Item>) itemRepository.findAll(byAvailableTrue.and(byNameOrDescriptionContainingText));
+
+        List<ItemDto> itemDtos = items.stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
         log.info("Получен список всех предметов по запросу \"" + text + "\"");
 
-        return items;
+        return itemDtos;
     }
 
+    @Transactional
     @Override
     public void delete(Long userId, Long itemId) {
-        if (userDao.notExists(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        if (itemDao.notExists(itemId)) {
+        if (!itemRepository.existsById(itemId)) {
             throw new NotFoundException("Предмет с id " + itemId + " не найден");
         }
-        if (itemDao.notOwns(userId, itemId)) {
+        if (notOwns(userId, itemId)) {
             throw new NotOwnerException("Пользователь с id " + userId + " не является " +
                     "владельцем предмета с id " + itemId);
         }
 
-        itemDao.delete(itemId);
+        itemRepository.deleteById(itemId);
         log.info("Предмет с id {} был удален", itemId);
+    }
+
+    @Transactional
+    @Override
+    public CommentDto createComment(Long userId, Long itemId, CommentTextDto commentTextDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет с id " + userId + " не найден"));
+
+        if (bookingRepository.countAllPrevious(itemId, userId) < 1) {
+            throw new NotAvailableException("Пользователь с id " + userId +
+                    " раньше не бронировал предмет с id " + itemId);
+        }
+
+        Comment comment = ItemMapper.toComment(userId, commentTextDto);
+        comment.setAuthor(user);
+        comment.setCreated(LocalDateTime.now());
+        comment.setItem(item);
+
+        CommentDto commentDto = ItemMapper.toCommentDto(commentRepository.save(comment));
+        log.info("Был добавлен новый комментарий, id {}", commentDto.getId());
+
+        return commentDto;
+    }
+
+    private boolean notOwns(Long userId, Long itemId) {
+        return itemRepository.findById(itemId)
+                .map(item -> !Objects.equals(item.getOwner().getId(), userId))
+                .orElse(true);
     }
 }
