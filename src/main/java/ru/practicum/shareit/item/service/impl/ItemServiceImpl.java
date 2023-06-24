@@ -99,7 +99,8 @@ public class ItemServiceImpl implements ItemService {
             return ItemMapper.toItemBookingsAndCommentsDto(item, comments);
         }
 
-        ItemBookingsAndCommentsDto itemBookingsAndCommentsDto = ItemMapper.toItemBookingsAndCommentsDto(item, bookings, comments);
+        ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
+                ItemMapper.toItemBookingsAndCommentsDto(item, bookings, comments);
         log.info("Получен предмет с id {}: {}", itemId, itemBookingsAndCommentsDto);
 
         return itemBookingsAndCommentsDto;
