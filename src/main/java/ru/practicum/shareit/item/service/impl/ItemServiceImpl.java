@@ -196,7 +196,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private boolean notOwns(Long userId, Long itemId) {
-        Optional<Item> itemOpt = itemRepository.findByIdWithOwner(itemId);
-        return itemOpt.map(item -> !Objects.equals(item.getOwner().getId(), userId)).orElse(true);
+        return itemRepository.findById(itemId)
+                .map(item -> !Objects.equals(item.getOwner().getId(), userId))
+                .orElse(true);
     }
 }
