@@ -14,9 +14,6 @@ spring:
     url: jdbc:h2:./db/shareit
     username: test
     password: test
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
 
 logging:
   level:
