@@ -9,7 +9,8 @@ import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.NotValidException;
+import ru.practicum.shareit.common.model.PaginationConfig;
+import ru.practicum.shareit.common.exception.NotValidException;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -55,13 +56,15 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllByBookerId(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                             @RequestParam(defaultValue = "ALL") BookingStatusDto state) {
-        return bookingService.getAllByBookerId(userId, state);
+                                             @RequestParam(defaultValue = "ALL") BookingStatusDto state,
+                                             @Valid PaginationConfig paginationConfig) {
+        return bookingService.getAllByBookerId(userId, state, paginationConfig);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                            @RequestParam(defaultValue = "ALL") BookingStatusDto state) {
-        return bookingService.getAllByOwnerId(userId, state);
+                                            @RequestParam(defaultValue = "ALL") BookingStatusDto state,
+                                            @Valid PaginationConfig paginationConfig) {
+        return bookingService.getAllByOwnerId(userId, state, paginationConfig);
     }
 }
