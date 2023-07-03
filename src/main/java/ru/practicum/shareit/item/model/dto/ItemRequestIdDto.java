@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Data
 @Builder
-public class ItemDto {
+public class ItemRequestIdDto {
     Long id;
 
     @Length(message = "Название предмета должно содержать от 1 до 200 символов", min = 1, max = 200, groups = {
@@ -29,4 +29,6 @@ public class ItemDto {
 
     @NotNull(message = "Статус доступности предмета не может отсутствовать", groups = ValidationMarker.OnCreate.class)
     Boolean available;
+
+    Long requestId;
 }

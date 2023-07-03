@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.marker.ValidationMarker;
+import ru.practicum.shareit.common.marker.ValidationMarker;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -22,10 +23,10 @@ public class ItemController {
 
     @PostMapping
     @Validated(ValidationMarker.OnCreate.class)
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody @Valid ItemDto itemDto) {
+    public ItemRequestIdDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                   @RequestBody @Valid ItemRequestIdDto itemRequestIdDto) {
 
-        return itemService.create(userId, itemDto);
+        return itemService.create(userId, itemRequestIdDto);
     }
 
     @PatchMapping("/{itemId}")
@@ -44,14 +45,16 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemBookingsDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        return itemService.getAllByOwnerId(ownerId);
+    public List<ItemBookingsDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                                                 @Valid PaginationConfig paginationConfig) {
+        return itemService.getAllByOwnerId(ownerId, paginationConfig);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getAllByTextQuery(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @RequestParam String text) {
-        return itemService.getAllByTextQuery(userId, text);
+                                           @RequestParam String text,
+                                           @Valid PaginationConfig paginationConfig) {
+        return itemService.getAllByTextQuery(userId, text, paginationConfig);
     }
 
     @DeleteMapping("/{itemId}")
