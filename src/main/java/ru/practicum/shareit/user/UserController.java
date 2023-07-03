@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.marker.ValidationMarker;
+import ru.practicum.shareit.common.marker.ValidationMarker;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
