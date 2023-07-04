@@ -34,14 +34,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User update(Long userId, UserDto userDto) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
         User user = UserMapper.toUser(userDto);
         user.setId(userId);
 
-        User foundUser = getById(userId);
         if (user.getName() == null) {
             user.setName(foundUser.getName());
         }
