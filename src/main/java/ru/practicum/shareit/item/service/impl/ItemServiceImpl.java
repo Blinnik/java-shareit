@@ -105,12 +105,13 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
-        List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
         if (!Objects.equals(item.getOwner().getId(), userId)) {
             return ItemMapper.toItemBookingsAndCommentsDto(item, comments);
         }
+
+        List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
 
         ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
                 ItemMapper.toItemBookingsAndCommentsDto(item, bookings, comments);
