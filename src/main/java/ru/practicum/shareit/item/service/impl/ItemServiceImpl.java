@@ -108,7 +108,11 @@ public class ItemServiceImpl implements ItemService {
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
         if (!Objects.equals(item.getOwner().getId(), userId)) {
-            return ItemMapper.toItemBookingsAndCommentsDto(item, comments);
+            ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
+                    ItemMapper.toItemBookingsAndCommentsDto(item, comments);
+            log.info("Получен предмет с id {}: {}", itemId, itemBookingsAndCommentsDto);
+
+            return itemBookingsAndCommentsDto;
         }
 
         List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
