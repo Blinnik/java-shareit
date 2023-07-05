@@ -25,7 +25,6 @@ public class ItemController {
     @Validated(ValidationMarker.OnCreate.class)
     public ItemRequestIdDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
                                    @RequestBody @Valid ItemRequestIdDto itemRequestIdDto) {
-
         return itemService.create(userId, itemRequestIdDto);
     }
 
@@ -34,7 +33,6 @@ public class ItemController {
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable Long itemId,
                           @RequestBody @Valid ItemDto itemDto) {
-
         return itemService.update(userId, itemId, itemDto);
     }
 
