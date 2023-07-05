@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.common.model.PaginationConfig;
-import ru.practicum.shareit.request.model.dto.RequestDescription;
+import ru.practicum.shareit.request.model.dto.RequestDescriptionDto;
 import ru.practicum.shareit.request.model.dto.RequestDto;
 import ru.practicum.shareit.request.model.dto.RequestItemsDto;
 import ru.practicum.shareit.request.service.RequestService;
@@ -22,8 +22,8 @@ public class RequestController {
 
     @PostMapping
     public RequestDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                             @RequestBody @Valid RequestDescription requestDescription) {
-        return requestService.create(userId, requestDescription);
+                             @RequestBody @Valid RequestDescriptionDto requestDescriptionDto) {
+        return requestService.create(userId, requestDescriptionDto);
     }
 
     @GetMapping

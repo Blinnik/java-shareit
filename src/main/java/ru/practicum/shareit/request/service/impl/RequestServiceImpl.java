@@ -14,7 +14,7 @@ import ru.practicum.shareit.item.model.dto.ItemRequestIdDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.model.dto.RequestItemsDto;
-import ru.practicum.shareit.request.model.dto.RequestDescription;
+import ru.practicum.shareit.request.model.dto.RequestDescriptionDto;
 import ru.practicum.shareit.request.model.dto.RequestDto;
 import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.service.RequestService;
@@ -38,12 +38,12 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional
-    public RequestDto create(Long userId, RequestDescription requestDescription) {
+    public RequestDto create(Long userId, RequestDescriptionDto requestDescriptionDto) {
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
         Request request = Request.builder()
-                .description(requestDescription.getDescription())
+                .description(requestDescriptionDto.getDescription())
                 .requester(requester)
                 .created(LocalDateTime.now())
                 .build();
