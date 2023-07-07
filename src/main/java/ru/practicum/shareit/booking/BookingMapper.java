@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.dto.BookingBookerIdDto;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
@@ -22,6 +23,7 @@ public class BookingMapper {
         return Booking.builder()
                 .item(Item.builder().id(itemId).build())
                 .booker(User.builder().id(bookerId).build())
+                .status(BookingStatus.WAITING)
                 .start(start)
                 .end(end)
                 .build();

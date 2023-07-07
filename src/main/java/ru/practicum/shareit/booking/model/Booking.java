@@ -37,6 +37,5 @@ public class Booking {
     User booker;
 
     @Enumerated(EnumType.STRING)
-    @Generated(GenerationTime.INSERT) // Без аннотации DEFAULT в БД не работает
-    BookingStatus status;
+    BookingStatus status = BookingStatus.WAITING; // DEFAULT
 }
