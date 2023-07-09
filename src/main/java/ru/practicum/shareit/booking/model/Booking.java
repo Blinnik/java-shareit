@@ -2,8 +2,6 @@ package ru.practicum.shareit.booking.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
