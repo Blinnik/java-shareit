@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -15,6 +17,8 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
             "WHERE i.id = ?1 ")
     Optional<Item> findByIdWithOwner(Long id);
 
-    List<Item> findAllByOwnerId(Long ownerId);
+    Page<Item> findAllByOwnerId(Long ownerId, Pageable pageable);
+
+    List<Item> findAllByRequestId(Long requestId);
 }
 

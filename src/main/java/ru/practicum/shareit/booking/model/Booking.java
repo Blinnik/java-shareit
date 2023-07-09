@@ -2,8 +2,6 @@ package ru.practicum.shareit.booking.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -28,15 +26,14 @@ public class Booking {
     @Column(name = "end_time")
     LocalDateTime end;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     Item item;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "booker_id", nullable = false)
     User booker;
 
     @Enumerated(EnumType.STRING)
-    @Generated(GenerationTime.INSERT) // Без аннотации DEFAULT в БД не работает
-    BookingStatus status;
+    BookingStatus status = BookingStatus.WAITING; // DEFAULT
 }

@@ -6,14 +6,8 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long>, QuerydslPredicateExecutor<Booking> {
-    @Query("SELECT b " +
-            "FROM Booking AS b " +
-            "JOIN FETCH b.item " +
-            "WHERE b.id = ?1 ")
-    Optional<Booking> findByIdWithItem(Long id);
 
     @Query("SELECT b " +
             "FROM Booking AS b " +

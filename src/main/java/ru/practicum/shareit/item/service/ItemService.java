@@ -1,19 +1,20 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.dto.*;
 
 import java.util.List;
 
 public interface ItemService {
-    ItemDto create(Long userId, ItemDto itemDto);
+    ItemRequestIdDto create(Long userId, ItemRequestIdDto itemRequestIdDto);
 
     ItemDto update(Long userId, Long itemId, ItemDto itemDto);
 
     ItemBookingsAndCommentsDto getById(Long userId, Long itemId);
 
-    List<ItemBookingsDto> getAllByOwnerId(Long ownerId);
+    List<ItemBookingsDto> getAllByOwnerId(Long ownerId, PaginationConfig paginationConfig);
 
-    List<ItemDto> getAllByTextQuery(Long userId, String text);
+    List<ItemDto> getAllByTextQuery(Long userId, String text, PaginationConfig paginationConfig);
 
     void delete(Long userId, Long itemId);
 
