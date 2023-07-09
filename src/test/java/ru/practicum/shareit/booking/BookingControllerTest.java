@@ -446,6 +446,16 @@ class BookingControllerTest {
     }
 
     @Test
+    void getAllByBookerId_whenBookingStateUnsupported_thenReturnErrorAndBadRequestStatus() throws Exception {
+        mvc.perform(get(URL + "?state=\"UNSUPPORTED_STATUS\"")
+                        .header("X-Sharer-User-Id", 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", containsString("Unknown state: \"UNSUPPORTED_STATUS\"")));
+    }
+
+    @Test
     void getAllByBookerId_whenBookingsNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
         when(bookingService.getAllByBookerId(anyLong(), any(BookingStatusDto.class), any(PaginationConfig.class)))
                 .thenThrow(new NotFoundException("По характеристике WAITING " +
@@ -494,5 +504,15 @@ class BookingControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error", containsString("По характеристике WAITING " +
                         "не было найдено вещей, забронированных у пользователя с id 1")));
+    }
+
+    @Test
+    void handleInternalServerError() throws Exception {
+        mvc.perform(delete(URL)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error",
+                        containsString("Request method 'DELETE' not supported")));
     }
 }
