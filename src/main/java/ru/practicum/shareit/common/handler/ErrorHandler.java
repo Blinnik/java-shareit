@@ -22,12 +22,6 @@ public class ErrorHandler {
         return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(AlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConflictException(final RuntimeException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler({ValidationException.class,
             NotValidException.class,
             NotAvailableException.class})
