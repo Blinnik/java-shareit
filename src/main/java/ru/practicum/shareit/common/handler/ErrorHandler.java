@@ -19,7 +19,7 @@ public class ErrorHandler {
             NotOwnerException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.NOT_FOUND);
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({ValidationException.class,
@@ -27,49 +27,39 @@ public class ErrorHandler {
             NotAvailableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestExceptions(final RuntimeException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBindException(final BindException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), "Unknown state: " + e.getValue(), HttpStatus.BAD_REQUEST);
+        return new ErrorResponse("Unknown state: " + e.getValue());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleServerErrorException(final Throwable e) {
-        return new ErrorResponse(e.getClass().getSimpleName(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ErrorResponse(e.getMessage());
     }
 
     @AllArgsConstructor
     static class ErrorResponse {
-        String errorClass;
         String error;
-        HttpStatus responseCodeStatus;
-
-        public String getErrorClass() {
-            return errorClass;
-        }
 
         public String getError() {
             return error;
-        }
-
-        public HttpStatus getResponseCodeStatus() {
-            return responseCodeStatus;
         }
     }
 }
