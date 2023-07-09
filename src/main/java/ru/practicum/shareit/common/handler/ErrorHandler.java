@@ -24,28 +24,18 @@ public class ErrorHandler {
 
     @ExceptionHandler({ValidationException.class,
             NotValidException.class,
-            NotAvailableException.class})
+            NotAvailableException.class,
+            BindException.class,
+            MethodArgumentNotValidException.class,
+            MethodArgumentTypeMismatchException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestExceptions(final RuntimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
+    public ErrorResponse handleBadRequestException(final Exception e) {
+        if (e.getClass().equals(MethodArgumentTypeMismatchException.class)) {
+            MethodArgumentTypeMismatchException typeMismatchException = (MethodArgumentTypeMismatchException) e;
+            return new ErrorResponse("Unknown state: " + typeMismatchException.getValue());
+        }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler(BindException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBindException(final BindException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
-        return new ErrorResponse("Unknown state: " + e.getValue());
     }
 
     @ExceptionHandler
