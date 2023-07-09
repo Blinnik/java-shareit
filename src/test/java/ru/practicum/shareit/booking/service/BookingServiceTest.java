@@ -76,13 +76,6 @@ class BookingServiceTest {
             .end(now.plusDays(20))
             .status(WAITING);
 
-    final ItemBookingsAndCommentsDto.ItemBookingsAndCommentsDtoBuilder itemBookingsAndCommentsDtoBuilder =
-            ItemBookingsAndCommentsDto.builder()
-                    .id(1L)
-                    .name("item")
-                    .description("item description")
-                    .available(true);
-
     final PaginationConfig paginationConfig = new PaginationConfig();
 
     final BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
