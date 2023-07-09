@@ -79,7 +79,7 @@ public class QCommentTest {
                 .text("Славный пылесос")
                 .author(commentator)
                 .item(item3)
-                .created(now)
+                .created(now.plusHours(1))
                 .build();
 
         comment2 = Comment.builder()
