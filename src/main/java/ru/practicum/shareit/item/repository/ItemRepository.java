@@ -17,7 +17,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
             "WHERE i.id = ?1 ")
     Optional<Item> findByIdWithOwner(Long id);
 
-    Page<Item> findAllByOwnerId(Long ownerId, Pageable pageable);
+    Page<Item> findAllByOwnerIdOrderByIdAsc(Long ownerId, Pageable pageable);
 
     List<Item> findAllByRequestId(Long requestId);
 }

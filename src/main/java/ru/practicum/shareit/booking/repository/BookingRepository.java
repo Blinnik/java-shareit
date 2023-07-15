@@ -20,7 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, Queryds
             "FROM Booking AS b " +
             "WHERE b.item.id = ?1 AND " +
             "b.booker.id = ?2 AND " +
-            "b.end < CURRENT_TIME AND " +
+            "b.end < CURRENT_TIMESTAMP AND " +
             "(b.status = 'APPROVED' OR " +
             "b.status = 'WAITING')")
     Integer countAllPrevious(Long itemId, Long bookerId);

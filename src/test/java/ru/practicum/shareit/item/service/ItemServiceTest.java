@@ -364,7 +364,7 @@ class ItemServiceTest {
         List<Booking> returnedBookings = List.of(lastBooking, nextBooking);
 
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(itemRepository.findAllByOwnerId(1L, paginationConfig.getPageable())).thenReturn(pagedItems);
+        when(itemRepository.findAllByOwnerIdOrderByIdAsc(1L, paginationConfig.getPageable())).thenReturn(pagedItems);
         when(bookingRepository.findAllAcceptedByItemId(anyLong())).thenReturn(returnedBookings);
 
         List<ItemBookingsDto> actualItemBookingsDto = itemService.getAllByOwnerId(1L, paginationConfig);
@@ -376,7 +376,7 @@ class ItemServiceTest {
         InOrder inOrder = inOrder(userRepository, itemRepository, bookingRepository);
         inOrder.verify(userRepository, times(1)).existsById(1L);
         inOrder.verify(itemRepository, times(1))
-                .findAllByOwnerId(1L, paginationConfig.getPageable());
+                .findAllByOwnerIdOrderByIdAsc(1L, paginationConfig.getPageable());
         inOrder.verify(bookingRepository, times(2)).findAllAcceptedByItemId(anyLong());
         verifyNoMoreInteractions(userRepository, itemRepository, bookingRepository);
     }

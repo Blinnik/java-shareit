@@ -131,7 +131,8 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        List<Item> items = itemRepository.findAllByOwnerId(userId, paginationConfig.getPageable()).getContent();
+        List<Item> items =
+                itemRepository.findAllByOwnerIdOrderByIdAsc(userId, paginationConfig.getPageable()).getContent();
 
         List<ItemBookingsDto> itemBookingsDtos = new ArrayList<>();
         for (Item item : items) {
