@@ -1,29 +1,33 @@
 package ru.practicum.shareit.booking.service.impl;
 
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.QBooking;
+import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.NotAvailableException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotOwnerException;
+import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.NotFoundException;
+import ru.practicum.shareit.common.exception.NotOwnerException;
+import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public Booking create(Long userId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
+    public BookingDto create(Long userId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
         Long itemId = bookingItemIdAndTimeDto.getItemId();
         Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
@@ -65,13 +69,13 @@ public class BookingServiceImpl implements BookingService {
         Booking createdBooking = bookingRepository.save(booking);
         log.info("Была добавлена бронь, id={}", createdBooking.getId());
 
-        return createdBooking;
+        return BookingMapper.toBookingDto(createdBooking);
     }
 
     @Transactional
     @Override
-    public Booking updateStatus(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = bookingRepository.findByIdWithItem(bookingId)
+    public BookingDto updateStatus(Long userId, Long bookingId, Boolean approved) {
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id " + bookingId + " не найдена"));
 
         Long itemId = booking.getItem().getId();
@@ -98,13 +102,13 @@ public class BookingServiceImpl implements BookingService {
         Booking updatedBooking = bookingRepository.save(booking);
         log.info("Был обновлен статус брони, id={}", bookingId);
 
-        return updatedBooking;
+        return BookingMapper.toBookingDto(updatedBooking);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Booking getById(Long userId, Long bookingId) {
-        Booking booking = bookingRepository.findByIdWithItem(bookingId)
+    public BookingDto getById(Long userId, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронь с id " + bookingId + " не найдена"));
 
         Long ownerId = booking.getItem().getOwner().getId();
@@ -115,15 +119,17 @@ public class BookingServiceImpl implements BookingService {
 
         log.info("Получена бронь с id {}: {}", bookingId, booking);
 
-        return booking;
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
-    public List<Booking> getAllByBookerId(Long userId, BookingStatusDto state) {
+    public List<BookingDto> getAllByBookerId(Long userId,
+                                             BookingStatusDto state,
+                                             PaginationConfig paginationConfig) {
         BooleanExpression byBookerId = qBooking.booker.id.eq(userId);
 
         try {
-            List<Booking> bookings = getAll(state, byBookerId);
+            List<BookingDto> bookings = getAll(state, byBookerId, paginationConfig);
             log.info("Получен список броней пользователя с id {}", userId);
 
             return bookings;
@@ -134,11 +140,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getAllByOwnerId(Long userId, BookingStatusDto state) {
+    public List<BookingDto> getAllByOwnerId(Long userId,
+                                            BookingStatusDto state,
+                                            PaginationConfig paginationConfig) {
         BooleanExpression byOwnerId = qBooking.item.owner.id.eq(userId);
 
         try {
-            List<Booking> bookings = getAll(state, byOwnerId);
+            List<BookingDto> bookings = getAll(state, byOwnerId, paginationConfig);
             log.info("Получен список броней пользователя с id {}", userId);
 
             return bookings;
@@ -148,67 +156,59 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<Booking> getAll(BookingStatusDto state, BooleanExpression byId) {
-        BooleanExpression byStatus;
-        OrderSpecifier<LocalDateTime> byStartDesc = qBooking.start.desc();
+    private List<BookingDto> getAll(BookingStatusDto state,
+                                    BooleanExpression byId,
+                                    PaginationConfig paginationConfig) {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Booking> bookings;
+        List<BooleanExpression> expressions = new ArrayList<>();
+
+        expressions.add(byId);
+
+        BooleanExpression byStatus;
 
         switch (state) {
-            case ALL:
-                bookings = (List<Booking>) bookingRepository.findAll(byId, byStartDesc);
-                break;
             case CURRENT:
                 BooleanExpression byStartBeforeOrEquals = qBooking.start.before(now)
                         .or(qBooking.start.eq(now));
                 BooleanExpression byEndAfter = qBooking.end.after(now);
 
-                bookings = (List<Booking>) bookingRepository.findAll(
-                        byId.and(byStartBeforeOrEquals).and(byEndAfter),
-                        byStartDesc
-                );
+                expressions.add(byStartBeforeOrEquals);
+                expressions.add(byEndAfter);
+
                 break;
             case PAST:
                 BooleanExpression byEndBefore = qBooking.end.before(now);
-
-                bookings = (List<Booking>) bookingRepository.findAll(
-                        byId.and(byEndBefore),
-                        byStartDesc
-                );
+                expressions.add(byEndBefore);
                 break;
             case FUTURE:
                 BooleanExpression byStartAfter = qBooking.start.after(now);
+                expressions.add(byStartAfter);
 
-                bookings = (List<Booking>) bookingRepository.findAll(
-                        byId.and(byStartAfter),
-                        byStartDesc
-                );
                 break;
             case WAITING:
                 byStatus = qBooking.status.eq(WAITING);
+                expressions.add(byStatus);
 
-                bookings = (List<Booking>) bookingRepository.findAll(
-                        byId.and(byStatus),
-                        byStartDesc
-                );
                 break;
             case REJECTED:
                 byStatus = qBooking.status.eq(REJECTED);
+                expressions.add(byStatus);
 
-                bookings = (List<Booking>) bookingRepository.findAll(
-                        byId.and(byStatus),
-                        byStartDesc
-                );
                 break;
-            default:
-                throw new NotFoundException();
         }
+
+        BooleanExpression finalExpression = expressions.stream().reduce(BooleanExpression::and).get();
+
+        Sort byStartDesc = Sort.by("start").descending();
+        Pageable pageable = paginationConfig.getPageable(byStartDesc);
+
+        List<Booking> bookings = bookingRepository.findAll(finalExpression, pageable).getContent();
 
         if (bookings.isEmpty()) {
             throw new NotFoundException();
         }
 
-        return bookings;
+        return BookingMapper.toBookingDto(bookings);
     }
 }

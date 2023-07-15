@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.NotAvailableException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.NotOwnerException;
+import ru.practicum.shareit.common.model.PaginationConfig;
+import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.NotFoundException;
+import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -20,6 +21,8 @@ import ru.practicum.shareit.item.model.dto.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,31 +39,40 @@ public class ItemServiceImpl implements ItemService {
     UserRepository userRepository;
     BookingRepository bookingRepository;
     CommentRepository commentRepository;
+    RequestRepository requestRepository;
 
     @Transactional
     @Override
-    public ItemDto create(Long userId, ItemDto itemDto) {
+    public ItemRequestIdDto create(Long userId, ItemRequestIdDto itemRequestIdDto) {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
-        Item item = ItemMapper.toItem(itemDto);
+        Long requestId = itemRequestIdDto.getRequestId();
+        Request request = null;
+        if (requestId != null) {
+            request = requestRepository.findById(requestId)
+                    .orElseThrow(() -> new NotFoundException("Запрос на предмет с id " + userId + " не найден"));
+        }
+
+        Item item = ItemMapper.toItem(itemRequestIdDto);
         item.setOwner(owner);
+        item.setRequest(request);
 
         Item createdItem = itemRepository.save(item);
         log.info("Был добавлен новый предмет, id={}", createdItem.getId());
 
-        return ItemMapper.toItemDto(createdItem);
+        return ItemMapper.toItemRequestIdDto(createdItem);
     }
 
     @Transactional
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
-        Item foundItem = itemRepository.findByIdWithOwner(itemId)
+        Item foundItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + userId + " не найден"));
+        foundItem.setOwner(user);
 
         if (!Objects.equals(foundItem.getOwner().getId(), userId)) {
             throw new NotOwnerException("Пользователь с id " + userId + " не является " +
@@ -93,12 +105,17 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findByIdWithOwner(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
-        List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
         if (!Objects.equals(item.getOwner().getId(), userId)) {
-            return ItemMapper.toItemBookingsAndCommentsDto(item, comments);
+            ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
+                    ItemMapper.toItemBookingsAndCommentsDto(item, comments);
+            log.info("Получен предмет с id {}: {}", itemId, itemBookingsAndCommentsDto);
+
+            return itemBookingsAndCommentsDto;
         }
+
+        List<Booking> bookings = bookingRepository.findAllAcceptedByItemId(itemId);
 
         ItemBookingsAndCommentsDto itemBookingsAndCommentsDto =
                 ItemMapper.toItemBookingsAndCommentsDto(item, bookings, comments);
@@ -109,12 +126,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemBookingsDto> getAllByOwnerId(Long userId) {
+    public List<ItemBookingsDto> getAllByOwnerId(Long userId, PaginationConfig paginationConfig) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        List<Item> items = itemRepository.findAllByOwnerId(userId, paginationConfig.getPageable()).getContent();
 
         List<ItemBookingsDto> itemBookingsDtos = new ArrayList<>();
         for (Item item : items) {
@@ -129,7 +146,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getAllByTextQuery(Long userId, String text) {
+    public List<ItemDto> getAllByTextQuery(Long userId, String text, PaginationConfig paginationConfig) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
@@ -142,7 +159,10 @@ public class ItemServiceImpl implements ItemService {
         BooleanExpression byNameOrDescriptionContainingText = QItem.item.name.containsIgnoreCase(text)
                 .or(QItem.item.description.containsIgnoreCase(text));
 
-        List<Item> items = (List<Item>) itemRepository.findAll(byAvailableTrue.and(byNameOrDescriptionContainingText));
+        List<Item> items = itemRepository.findAll(
+                        byAvailableTrue.and(byNameOrDescriptionContainingText),
+                        paginationConfig.getPageable())
+                .getContent();
 
         List<ItemDto> itemDtos = items.stream()
                 .map(ItemMapper::toItemDto)

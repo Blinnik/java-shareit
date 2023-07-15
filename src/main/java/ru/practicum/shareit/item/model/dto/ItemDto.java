@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
-import ru.practicum.shareit.marker.ValidationMarker;
+import ru.practicum.shareit.common.marker.ValidationMarker;
 
 import javax.validation.constraints.NotNull;
 

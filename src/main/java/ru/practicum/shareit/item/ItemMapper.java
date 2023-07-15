@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.dto.*;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -22,12 +23,38 @@ public class ItemMapper {
                 .build();
     }
 
+    public static ItemRequestIdDto toItemRequestIdDto(Item item) {
+        Request request = item.getRequest();
+        return ItemRequestIdDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(request == null ? null : request.getId())
+                .build();
+    }
+
+    public static List<ItemRequestIdDto> toItemRequestIdDto(List<Item> items) {
+        return items.stream()
+                .map(ItemMapper::toItemRequestIdDto)
+                .collect(Collectors.toList());
+    }
+
     public static Item toItem(ItemDto itemDto) {
         return Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
+                .build();
+    }
+
+    public static Item toItem(ItemRequestIdDto itemRequestIdDto) {
+        return Item.builder()
+                .id(itemRequestIdDto.getId())
+                .name(itemRequestIdDto.getName())
+                .description(itemRequestIdDto.getDescription())
+                .available(itemRequestIdDto.getAvailable())
                 .build();
     }
 
