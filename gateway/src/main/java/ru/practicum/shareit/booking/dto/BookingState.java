@@ -12,5 +12,5 @@ public enum BookingState {
 	// Отклоненные
 	REJECTED,
 	// Ожидающие подтверждения
-	WAITING;
+	WAITING
 }
