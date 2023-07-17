@@ -1,6 +1,5 @@
-db:
-  name: shareit
-  port: 5432
+server:
+  port: 9090
 
 spring:
   jpa:
@@ -15,7 +14,7 @@ spring:
       mode: always
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:${db.port}/${db.name}
+    url: ${SPRING_DATASOURCE_URL}
     username: root
     password: root
 
@@ -30,7 +29,7 @@ spring:
       on-profile: ci, test
   datasource:
     driverClassName: org.h2.Driver
-    url: jdbc:h2:./db/${db.name}
+    url: jdbc:h2:./db/shareit
     username: test
     password: test
 
