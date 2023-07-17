@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.shareit.common.exception.*;
+import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.NotFoundException;
+import ru.practicum.shareit.common.exception.NotOwnerException;
+import ru.practicum.shareit.common.exception.NotValidException;
 
 import javax.validation.ValidationException;
 
