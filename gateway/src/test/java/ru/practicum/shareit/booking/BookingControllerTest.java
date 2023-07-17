@@ -9,17 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.model.dto.BookingDto;
-import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
-import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
-import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingItemIdAndTimeDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.common.exception.NotAvailableException;
 import ru.practicum.shareit.common.exception.NotFoundException;
 import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
-import ru.practicum.shareit.user.model.dto.ItemBookerDto;
+import ru.practicum.shareit.user.dto.ItemBookerDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -42,7 +41,7 @@ class BookingControllerTest {
     ObjectMapper mapper;
 
     @MockBean
-    BookingService bookingService;
+    BookingClient bookingClient;
 
     @Autowired
     MockMvc mvc;
@@ -77,12 +76,14 @@ class BookingControllerTest {
                 .status(BookingStatus.WAITING)
                 .build();
 
-        bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(1L, start.toString(), end.toString());
+        bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(1L, start, end);
     }
 
     @Test
     void create_whenItemFoundAndAvailableAndUserFoundAndNotOwner_thenReturnBookingDtoAndStatusOk() throws Exception {
-        when(bookingService.create(1L, bookingItemIdAndTimeDto)).thenReturn(bookingDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(bookingDto);
+
+        when(bookingClient.create(1L, bookingItemIdAndTimeDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -105,7 +106,7 @@ class BookingControllerTest {
     @Test
     void create_whenItemIdNull_thenReturnErrorAndStatusBadRequest() throws Exception {
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(null, start.toString(), end.toString());
+                new BookingItemIdAndTimeDto(null, start, end);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -121,7 +122,7 @@ class BookingControllerTest {
     @Test
     void create_whenStartNull_thenReturnErrorAndStatusBadRequest() throws Exception {
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(1L, null, end.toString());
+                new BookingItemIdAndTimeDto(1L, null, end);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -137,7 +138,7 @@ class BookingControllerTest {
     @Test
     void create_whenEndNull_thenReturnErrorAndStatusBadRequest() throws Exception {
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(1L, start.toString(), null);
+                new BookingItemIdAndTimeDto(1L, start, null);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -152,7 +153,7 @@ class BookingControllerTest {
 
     @Test
     void create_whenItemNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.create(1L, bookingItemIdAndTimeDto))
+        when(bookingClient.create(1L, bookingItemIdAndTimeDto))
                 .thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -168,7 +169,7 @@ class BookingControllerTest {
 
     @Test
     void create_whenItemNotAvailable_thenReturnErrorAndStatusBadRequest() throws Exception {
-        when(bookingService.create(1L, bookingItemIdAndTimeDto))
+        when(bookingClient.create(1L, bookingItemIdAndTimeDto))
                 .thenThrow(new NotAvailableException("Предмет не доступен для брони"));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -184,7 +185,7 @@ class BookingControllerTest {
 
     @Test
     void create_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.create(1L, bookingItemIdAndTimeDto))
+        when(bookingClient.create(1L, bookingItemIdAndTimeDto))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -200,7 +201,7 @@ class BookingControllerTest {
 
     @Test
     void create_whenUserOwner_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.create(1L, bookingItemIdAndTimeDto))
+        when(bookingClient.create(1L, bookingItemIdAndTimeDto))
                 .thenThrow(new NotFoundException("Пользователь не может забронировать собственный предмет"));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -221,7 +222,7 @@ class BookingControllerTest {
         LocalDateTime end = start.minusSeconds(1);
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(1L, start.toString(), end.toString());
+                new BookingItemIdAndTimeDto(1L, start, end);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -241,7 +242,7 @@ class BookingControllerTest {
         LocalDateTime end = start.plusSeconds(1);
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(1L, start.toString(), end.toString());
+                new BookingItemIdAndTimeDto(1L, start, end);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -260,7 +261,7 @@ class BookingControllerTest {
         LocalDateTime start = LocalDateTime.now().plusSeconds(1);
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-                new BookingItemIdAndTimeDto(1L, start.toString(), start.toString());
+                new BookingItemIdAndTimeDto(1L, start, start);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -287,7 +288,9 @@ class BookingControllerTest {
                 .status(BookingStatus.REJECTED)
                 .build();
 
-        when(bookingService.updateStatus(1L, 1L, false)).thenReturn(bookingDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(bookingDto);
+
+        when(bookingClient.updateStatus(1L, 1L, false)).thenReturn(response);
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(patch(PATH_VARIABLE_URL + approvedParam)
@@ -311,7 +314,7 @@ class BookingControllerTest {
     void updateStatus_whenBookingNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
         String approvedParam = "?approved=false";
 
-        when(bookingService.updateStatus(1L, 1L, false))
+        when(bookingClient.updateStatus(1L, 1L, false))
                 .thenThrow(new NotFoundException(BOOKING_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -329,7 +332,7 @@ class BookingControllerTest {
     void updateStatus_whenItemNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
         String approvedParam = "?approved=false";
 
-        when(bookingService.updateStatus(1L, 1L, false))
+        when(bookingClient.updateStatus(1L, 1L, false))
                 .thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -347,7 +350,7 @@ class BookingControllerTest {
     void updateStatus_whenUserNotOwner_thenReturnErrorAndStatusNotFound() throws Exception {
         String approvedParam = "?approved=false";
 
-        when(bookingService.updateStatus(1L, 1L, false))
+        when(bookingClient.updateStatus(1L, 1L, false))
                 .thenThrow(new NotOwnerException(NOT_OWNER_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -365,7 +368,7 @@ class BookingControllerTest {
     void updateStatus_whenStatusSame_thenReturnErrorAndStatusBadRequest() throws Exception {
         String approvedParam = "?approved=true";
 
-        when(bookingService.updateStatus(1L, 1L, true))
+        when(bookingClient.updateStatus(1L, 1L, true))
                 .thenThrow(new NotAvailableException("Нельзя повторно одобрить бронь"));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
@@ -381,7 +384,9 @@ class BookingControllerTest {
 
     @Test
     void getById_whenBookingFoundAndUserConnectedWithBooking_thenReturnBookingDtoAndStatusOk() throws Exception {
-        when(bookingService.getById(1L, 1L)).thenReturn(bookingDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(bookingDto);
+
+        when(bookingClient.getById(1L, 1L)).thenReturn(response);
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -400,7 +405,7 @@ class BookingControllerTest {
 
     @Test
     void getById_whenBookingNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.getById(1L, 1L)).thenThrow(new NotFoundException(BOOKING_NOT_FOUND_ERROR));
+        when(bookingClient.getById(1L, 1L)).thenThrow(new NotFoundException(BOOKING_NOT_FOUND_ERROR));
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -412,7 +417,7 @@ class BookingControllerTest {
 
     @Test
     void getById_whenUserNotConnectedWithBooking_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.getById(1L, 1L))
+        when(bookingClient.getById(1L, 1L))
                 .thenThrow(new NotFoundException("Нет броней, связанных с пользователем с id 1"));
 
         mvc.perform(get(PATH_VARIABLE_URL)
@@ -426,8 +431,12 @@ class BookingControllerTest {
 
     @Test
     void getAllByBookerId_whenBookingsFound_thenReturnBookingsDtoAndStatusOk() throws Exception {
-        when(bookingService.getAllByBookerId(anyLong(), any(BookingStatusDto.class), any(PaginationConfig.class)))
-                .thenReturn(List.of(bookingDto));
+        ResponseEntity<Object> response = ResponseEntity
+                .ok()
+                .body(List.of(bookingDto));
+
+        when(bookingClient.getAllByBookerId(anyLong(), any(BookingState.class), any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -457,7 +466,7 @@ class BookingControllerTest {
 
     @Test
     void getAllByBookerId_whenBookingsNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.getAllByBookerId(anyLong(), any(BookingStatusDto.class), any(PaginationConfig.class)))
+        when(bookingClient.getAllByBookerId(anyLong(), any(BookingState.class), any(PaginationConfig.class)))
                 .thenThrow(new NotFoundException("По характеристике WAITING " +
                         "не было найдено вещей, забронированных пользователем с id 1"));
 
@@ -472,8 +481,12 @@ class BookingControllerTest {
 
     @Test
     void getAllByOwnerId_whenBookingsFound_thenReturnBookingsDtoAndStatusOk() throws Exception {
-        when(bookingService.getAllByOwnerId(anyLong(), any(BookingStatusDto.class), any(PaginationConfig.class)))
-                .thenReturn(List.of(bookingDto));
+        ResponseEntity<Object> response = ResponseEntity
+                .ok()
+                .body(List.of(bookingDto));
+
+        when(bookingClient.getAllByOwnerId(anyLong(), any(BookingState.class), any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(OWNER_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -493,7 +506,7 @@ class BookingControllerTest {
 
     @Test
     void getAllByOwnerId_whenBookingsNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(bookingService.getAllByOwnerId(anyLong(), any(BookingStatusDto.class), any(PaginationConfig.class)))
+        when(bookingClient.getAllByOwnerId(anyLong(), any(BookingState.class), any(PaginationConfig.class)))
                 .thenThrow(new NotFoundException("По характеристике WAITING " +
                         "не было найдено вещей, забронированных у пользователя с id 1"));
 
