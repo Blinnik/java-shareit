@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.model.dto.BookingBookerIdDto;
+import ru.practicum.shareit.booking.dto.BookingBookerIdDto;
 import ru.practicum.shareit.common.exception.NotAvailableException;
 import ru.practicum.shareit.common.exception.NotFoundException;
 import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
-import ru.practicum.shareit.item.model.dto.*;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.dto.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -27,7 +27,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -41,7 +40,7 @@ class ItemControllerTest {
     ObjectMapper mapper;
 
     @MockBean
-    ItemService itemService;
+    ItemClient itemClient;
 
     @Autowired
     MockMvc mvc;
@@ -111,7 +110,9 @@ class ItemControllerTest {
 
     @Test
     void create_whenItemRequestIdDtoCorrectAndUserAndRequestFound_thenReturnItemRequestIdDtoAndStatusOk() throws Exception {
-        when(itemService.create(1L, itemRequestIdDto)).thenReturn(itemRequestIdDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemRequestIdDto);
+
+        when(itemClient.create(1L, itemRequestIdDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
         mvc.perform(post(URL)
@@ -130,7 +131,7 @@ class ItemControllerTest {
 
     @Test
     void create_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.create(1L, itemRequestIdDto))
+        when(itemClient.create(1L, itemRequestIdDto))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
@@ -146,7 +147,7 @@ class ItemControllerTest {
 
     @Test
     void create_whenRequestNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.create(1L, itemRequestIdDto))
+        when(itemClient.create(1L, itemRequestIdDto))
                 .thenThrow(new NotFoundException(REQUEST_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
@@ -332,7 +333,9 @@ class ItemControllerTest {
 
     @Test
     void update_whenItemDtoCorrectAndUserAndItemFound_thenReturnItemDtoAndStatusOk() throws Exception {
-        when(itemService.update(1L, 1L, itemDto)).thenReturn(itemDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemDto);
+
+        when(itemClient.update(1L, 1L, itemDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(itemDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -359,7 +362,9 @@ class ItemControllerTest {
                 .available(true)
                 .build();
 
-        when(itemService.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(itemDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemDto);
+
+        when(itemClient.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(response);
 
         String json = mapper.writeValueAsString(itemDtoWithUpdatedField);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -386,7 +391,9 @@ class ItemControllerTest {
                 .available(true)
                 .build();
 
-        when(itemService.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(itemDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemDto);
+
+        when(itemClient.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(response);
 
         String json = mapper.writeValueAsString(itemDtoWithUpdatedField);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -413,7 +420,9 @@ class ItemControllerTest {
                 .available(false)
                 .build();
 
-        when(itemService.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(itemDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemDto);
+
+        when(itemClient.update(1L, 1L, itemDtoWithUpdatedField)).thenReturn(response);
 
         String json = mapper.writeValueAsString(itemDtoWithUpdatedField);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -431,7 +440,7 @@ class ItemControllerTest {
 
     @Test
     void update_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.update(1L, 1L, itemDto))
+        when(itemClient.update(1L, 1L, itemDto))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
@@ -447,7 +456,7 @@ class ItemControllerTest {
 
     @Test
     void update_whenItemNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.update(1L, 1L, itemDto))
+        when(itemClient.update(1L, 1L, itemDto))
                 .thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
@@ -463,7 +472,7 @@ class ItemControllerTest {
 
     @Test
     void update_whenUserNotOwner_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.update(1L, 1L, itemDto))
+        when(itemClient.update(1L, 1L, itemDto))
                 .thenThrow(new NotOwnerException(NOT_OWNER_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
@@ -573,7 +582,9 @@ class ItemControllerTest {
 
     @Test
     void getById_whenItemFound_thenReturnItemAndStatusOk() throws Exception {
-        when(itemService.getById(1L, 1L)).thenReturn(itemBookingsAndCommentsDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(itemBookingsAndCommentsDto);
+
+        when(itemClient.getById(1L, 1L)).thenReturn(response);
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -601,7 +612,7 @@ class ItemControllerTest {
 
     @Test
     void getById_whenItemNotFound_thenReturnErrorAndStatusBadRequest() throws Exception {
-        when(itemService.getById(1L, 1L)).thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
+        when(itemClient.getById(1L, 1L)).thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -615,8 +626,10 @@ class ItemControllerTest {
 
     @Test
     void getAllByOwnerId_whenUserFoundAndItemsExist_thenReturnItemsAndStatusOk() throws Exception {
-        when(itemService.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
-                .thenReturn(List.of(itemBookingsDto));
+        ResponseEntity<Object> response = ResponseEntity.ok().body(List.of(itemBookingsDto));
+
+        when(itemClient.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -637,8 +650,10 @@ class ItemControllerTest {
 
     @Test
     void getAllByOwnerId_whenUserFoundAndItemsNotExist_thenReturnEmptyListAndStatusOk() throws Exception {
-        when(itemService.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
-                .thenReturn(Collections.emptyList());
+        ResponseEntity<Object> response = ResponseEntity.ok().body(Collections.emptyList());
+
+        when(itemClient.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -650,7 +665,7 @@ class ItemControllerTest {
 
     @Test
     void getAllByOwnerId_whenUserNotFound_thenThrowErrorAndStatusNotFound() throws Exception {
-        when(itemService.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+        when(itemClient.getAllByOwnerId(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(URL)
@@ -687,8 +702,10 @@ class ItemControllerTest {
 
     @Test
     void getAllByTextQuery_whenUserFoundAndTextNotEmpty_thenReturnItemsAndStatusOk() throws Exception {
-        when(itemService.getAllByTextQuery(anyLong(), anyString(), ArgumentMatchers.any(PaginationConfig.class)))
-                .thenReturn(List.of(itemDto));
+        ResponseEntity<Object> response = ResponseEntity.ok().body(List.of(itemDto));
+
+        when(itemClient.getAllByTextQuery(anyLong(), anyString(), ArgumentMatchers.any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(SEARCH_URL + "?text=\"test\"")
                         .header("X-Sharer-User-Id", 1L)
@@ -703,8 +720,10 @@ class ItemControllerTest {
 
     @Test
     void getAllByTextQuery_whenUserFoundAndTextEmpty_thenReturnItemsAndStatusOk() throws Exception {
-        when(itemService.getAllByTextQuery(anyLong(), ArgumentMatchers.matches(""),
-                ArgumentMatchers.any(PaginationConfig.class))).thenReturn(Collections.emptyList());
+        ResponseEntity<Object> response = ResponseEntity.ok().body(Collections.emptyList());
+
+        when(itemClient.getAllByTextQuery(anyLong(), ArgumentMatchers.matches(""),
+                ArgumentMatchers.any(PaginationConfig.class))).thenReturn(response);
 
         mvc.perform(get(SEARCH_URL + "?text=\"\"")
                         .header("X-Sharer-User-Id", 1L)
@@ -716,7 +735,7 @@ class ItemControllerTest {
 
     @Test
     void getAllByTextQuery_whenUserNotFound_thenThrowErrorAndStatusNotFound() throws Exception {
-        when(itemService.getAllByTextQuery(anyLong(), anyString(),
+        when(itemClient.getAllByTextQuery(anyLong(), anyString(),
                 ArgumentMatchers.any(PaginationConfig.class))).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(SEARCH_URL + "?text=\"test\"")
@@ -762,7 +781,7 @@ class ItemControllerTest {
 
     @Test
     void delete_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        doThrow(new NotFoundException(USER_NOT_FOUND_ERROR)).when(itemService).delete(1L, 1L);
+        when(itemClient.deleteItem(1L, 1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(delete(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -774,7 +793,7 @@ class ItemControllerTest {
 
     @Test
     void delete_whenItemNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        doThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR)).when(itemService).delete(1L, 1L);
+        when(itemClient.deleteItem(1L, 1L)).thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         mvc.perform(delete(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -786,7 +805,7 @@ class ItemControllerTest {
 
     @Test
     void delete_whenUserNotOwner_thenReturnErrorAndStatusNotFound() throws Exception {
-        doThrow(new NotFoundException(NOT_OWNER_ERROR)).when(itemService).delete(1L, 1L);
+        when(itemClient.deleteItem(1L, 1L)).thenThrow(new NotFoundException(NOT_OWNER_ERROR));
 
         mvc.perform(delete(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -798,7 +817,9 @@ class ItemControllerTest {
 
     @Test
     void createComment_whenUserAndItemFoundAndUserBooker_thenReturnCommentDtoAndStatusOk() throws Exception {
-        when(itemService.createComment(1L, 1L, commentTextDto)).thenReturn(commentDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(commentDto);
+
+        when(itemClient.createComment(1L, 1L, commentTextDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(commentTextDto);
         mvc.perform(post(COMMENT_URL)
@@ -817,7 +838,7 @@ class ItemControllerTest {
 
     @Test
     void createComment_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.createComment(1L, 1L, commentTextDto))
+        when(itemClient.createComment(1L, 1L, commentTextDto))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(commentTextDto);
@@ -833,7 +854,7 @@ class ItemControllerTest {
 
     @Test
     void createComment_whenItemNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(itemService.createComment(1L, 1L, commentTextDto))
+        when(itemClient.createComment(1L, 1L, commentTextDto))
                 .thenThrow(new NotFoundException(ITEM_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(commentTextDto);
@@ -849,7 +870,7 @@ class ItemControllerTest {
 
     @Test
     void createComment_whenUserNotBooker_thenReturnErrorAndStatusBadRequest() throws Exception {
-        when(itemService.createComment(1L, 1L, commentTextDto))
+        when(itemClient.createComment(1L, 1L, commentTextDto))
                 .thenThrow(new NotAvailableException("Пользователь с id 1 раньше не бронировал предмет с id 1"));
 
         String json = mapper.writeValueAsString(commentTextDto);

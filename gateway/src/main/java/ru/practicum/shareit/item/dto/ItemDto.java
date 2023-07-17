@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model.dto;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
