@@ -4,17 +4,14 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Data
 public class BookingItemIdAndTimeDto {
-    @NotNull
     Long itemId;
 
-    @NotNull
-    String start;
+    LocalDateTime start;
 
-    @NotNull
-    String end;
+    LocalDateTime end;
 }

@@ -10,6 +10,7 @@ import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,8 +22,8 @@ class BookingItemIdAndTimeDtoJsonTest {
     JacksonTester<BookingItemIdAndTimeDto> jackson;
 
     final Long itemId = 1L;
-    final String start = "2010-11-29T12:12:12";
-    final String end = "2010-12-29T12:12:12";
+    final LocalDateTime start = LocalDateTime.of(2010, 11, 29, 12, 12, 12);
+    final LocalDateTime end = LocalDateTime.of(2010, 12, 29, 12, 12, 12);
 
     @Test
     void serializeBookingItemIdAndTimeDto() throws IOException {
@@ -31,8 +32,8 @@ class BookingItemIdAndTimeDtoJsonTest {
         JsonContent<BookingItemIdAndTimeDto> result = jackson.write(bookingItemIdAndTimeDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.itemId").isEqualTo(itemId.intValue());
-        assertThat(result).extractingJsonPathStringValue("$.start").isEqualTo(start);
-        assertThat(result).extractingJsonPathStringValue("$.end").isEqualTo(end);
+        assertThat(result).extractingJsonPathStringValue("$.start").isEqualTo(start.toString());
+        assertThat(result).extractingJsonPathStringValue("$.end").isEqualTo(end.toString());
     }
 
     @Test

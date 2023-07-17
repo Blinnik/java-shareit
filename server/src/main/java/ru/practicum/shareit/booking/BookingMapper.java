@@ -10,22 +10,19 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BookingMapper {
     public static Booking toBooking(Long bookerId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
         Long itemId = bookingItemIdAndTimeDto.getItemId();
-        LocalDateTime start = LocalDateTime.parse(bookingItemIdAndTimeDto.getStart());
-        LocalDateTime end = LocalDateTime.parse(bookingItemIdAndTimeDto.getEnd());
 
         return Booking.builder()
                 .item(Item.builder().id(itemId).build())
                 .booker(User.builder().id(bookerId).build())
                 .status(BookingStatus.WAITING)
-                .start(start)
-                .end(end)
+                .start(bookingItemIdAndTimeDto.getStart())
+                .end(bookingItemIdAndTimeDto.getEnd())
                 .build();
     }
 

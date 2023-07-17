@@ -14,7 +14,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
-import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
+import ru.practicum.shareit.booking.model.dto.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.common.exception.NotAvailableException;
@@ -124,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllByBookerId(Long userId,
-                                             BookingStatusDto state,
+                                             BookingState state,
                                              PaginationConfig paginationConfig) {
         BooleanExpression byBookerId = qBooking.booker.id.eq(userId);
 
@@ -141,7 +141,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllByOwnerId(Long userId,
-                                            BookingStatusDto state,
+                                            BookingState state,
                                             PaginationConfig paginationConfig) {
         BooleanExpression byOwnerId = qBooking.item.owner.id.eq(userId);
 
@@ -156,7 +156,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<BookingDto> getAll(BookingStatusDto state,
+    private List<BookingDto> getAll(BookingState state,
                                     BooleanExpression byId,
                                     PaginationConfig paginationConfig) {
         LocalDateTime now = LocalDateTime.now();

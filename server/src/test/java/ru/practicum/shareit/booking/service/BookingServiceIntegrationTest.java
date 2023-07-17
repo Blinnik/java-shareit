@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
-import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
+import ru.practicum.shareit.booking.model.dto.BookingState;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.dto.ItemRequestIdDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -67,20 +67,20 @@ class BookingServiceIntegrationTest {
         // Создаем брони
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(
                 itemRequestIdDto.getId(),
-                LocalDateTime.now().plusDays(1).toString(),
-                LocalDateTime.now().plusDays(2).toString()
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2)
         );
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto2 = new BookingItemIdAndTimeDto(
                 itemRequestIdDto.getId(),
-                LocalDateTime.now().plusDays(10).toString(),
-                LocalDateTime.now().plusDays(20).toString()
+                LocalDateTime.now().plusDays(10),
+                LocalDateTime.now().plusDays(20)
         );
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto3 = new BookingItemIdAndTimeDto(
                 itemRequestIdDto2.getId(),
-                LocalDateTime.now().plusDays(4).toString(),
-                LocalDateTime.now().plusDays(5).toString()
+                LocalDateTime.now().plusDays(4),
+                LocalDateTime.now().plusDays(5)
         );
 
         BookingDto bookingDto = bookingService.create(bookerId, bookingItemIdAndTimeDto);
@@ -88,16 +88,16 @@ class BookingServiceIntegrationTest {
         BookingDto bookingDto3 = bookingService.create(booker2Id, bookingItemIdAndTimeDto3);
 
         List<BookingDto> expectedBookingDtoListOfBooker1 =
-                bookingService.getAllByBookerId(bookerId, BookingStatusDto.ALL, paginationConfig);
+                bookingService.getAllByBookerId(bookerId, BookingState.ALL, paginationConfig);
 
         // Меняем статус
         bookingService.updateStatus(ownerId, bookingDto.getId(), true);
 
         List<BookingDto> expectedBookingDtoListOfBooker1WhenStatusUpdated =
-                bookingService.getAllByBookerId(bookerId, BookingStatusDto.WAITING, paginationConfig);
+                bookingService.getAllByBookerId(bookerId, BookingState.WAITING, paginationConfig);
 
         List<BookingDto> expectedBookingDtoListOfBooker2 =
-                bookingService.getAllByBookerId(booker2Id, BookingStatusDto.ALL, paginationConfig);
+                bookingService.getAllByBookerId(booker2Id, BookingState.ALL, paginationConfig);
 
 
         assertEquals(2, expectedBookingDtoListOfBooker1.size());

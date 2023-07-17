@@ -19,7 +19,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.model.dto.BookingDto;
 import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
-import ru.practicum.shareit.booking.model.dto.BookingStatusDto;
+import ru.practicum.shareit.booking.model.dto.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.impl.BookingServiceImpl;
 import ru.practicum.shareit.common.exception.NotAvailableException;
@@ -78,7 +78,7 @@ class BookingServiceTest {
     final PaginationConfig paginationConfig = new PaginationConfig();
 
     final BookingItemIdAndTimeDto bookingItemIdAndTimeDto =
-            new BookingItemIdAndTimeDto(1L, now.plusDays(10).toString(), now.plusDays(20).toString());
+            new BookingItemIdAndTimeDto(1L, now.plusDays(10), now.plusDays(20));
 
     @Test
     void create_whenItemFoundAndAvailableAndUserNotOwnerAndFound_thenReturnBookingDto() {
@@ -350,7 +350,7 @@ class BookingServiceTest {
                 .thenReturn(pagedBookings);
 
         List<BookingDto> actualBookingDtos =
-                bookingService.getAllByOwnerId(1L, BookingStatusDto.WAITING, paginationConfig);
+                bookingService.getAllByOwnerId(1L, BookingState.WAITING, paginationConfig);
         List<BookingDto> expectedBookingDtos = BookingMapper.toBookingDto(returnedBookings);
 
         assertEquals(expectedBookingDtos, actualBookingDtos);
@@ -374,7 +374,7 @@ class BookingServiceTest {
                 .thenReturn(Page.empty());
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> bookingService.getAllByOwnerId(1L, BookingStatusDto.WAITING, paginationConfig));
+                () -> bookingService.getAllByOwnerId(1L, BookingState.WAITING, paginationConfig));
 
         assertEquals("По характеристике WAITING не было найдено вещей, забронированных у пользователя с id 1",
                 notFoundException.getMessage());
@@ -409,7 +409,7 @@ class BookingServiceTest {
                 .thenReturn(pagedBookings);
 
         List<BookingDto> actualBookingDtos =
-                bookingService.getAllByBookerId(1L, BookingStatusDto.WAITING, paginationConfig);
+                bookingService.getAllByBookerId(1L, BookingState.WAITING, paginationConfig);
         List<BookingDto> expectedBookingDtos = BookingMapper.toBookingDto(returnedBookings);
 
         assertEquals(expectedBookingDtos, actualBookingDtos);
@@ -433,7 +433,7 @@ class BookingServiceTest {
                 .thenReturn(Page.empty());
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> bookingService.getAllByBookerId(1L, BookingStatusDto.WAITING, paginationConfig));
+                () -> bookingService.getAllByBookerId(1L, BookingState.WAITING, paginationConfig));
 
         assertEquals("По характеристике WAITING не было найдено вещей, забронированных пользователем с id 1",
                 notFoundException.getMessage());
