@@ -9,11 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.model.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,7 +33,7 @@ class UserControllerTest {
     ObjectMapper mapper;
 
     @MockBean
-    UserService userService;
+    UserClient userClient;
 
     @Autowired
     MockMvc mvc;
@@ -64,7 +62,9 @@ class UserControllerTest {
 
     @Test
     void create_whenFieldsCorrect_thenReturnUserAndStatusOk() throws Exception {
-        when(userService.create(userDto)).thenReturn(user);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(user);
+
+        when(userClient.create(userDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(userDto);
         mvc.perform(post(URL)
@@ -199,7 +199,9 @@ class UserControllerTest {
         Long userId = 1L;
         user = userBuilder.id(userId).name("test2").email("test@mail.com").build();
 
-        when(userService.update(userId, userDto)).thenReturn(user);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(user);
+
+        when(userClient.update(userId, userDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(userDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -219,7 +221,9 @@ class UserControllerTest {
         Long userId = 1L;
         user = userBuilder.id(userId).name("test").email("test2@mail.com").build();
 
-        when(userService.update(userId, userDto)).thenReturn(user);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(user);
+
+        when(userClient.update(userId, userDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(userDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -239,7 +243,9 @@ class UserControllerTest {
         Long userId = 1L;
         user = userBuilder.id(userId).name("test2").email("test2@mail.com").build();
 
-        when(userService.update(userId, userDto)).thenReturn(user);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(user);
+
+        when(userClient.update(userId, userDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(userDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -337,7 +343,7 @@ class UserControllerTest {
 
     @Test
     void update_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(userService.update(1L, userDto)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
+        when(userClient.update(1L, userDto)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(userDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -352,7 +358,9 @@ class UserControllerTest {
 
     @Test
     void getById_whenUserFound_thenReturnUserAndStatusOk() throws Exception {
-        when(userService.getById(1L)).thenReturn(user);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(user);
+
+        when(userClient.getById(1L)).thenReturn(response);
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -366,7 +374,7 @@ class UserControllerTest {
 
     @Test
     void getById_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(userService.getById(1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
+        when(userClient.getById(1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -378,7 +386,9 @@ class UserControllerTest {
 
     @Test
     void getAll_whenUsersFound_thenReturnUsersAndStatusOk() throws Exception {
-        when(userService.getAll()).thenReturn(List.of(user));
+        ResponseEntity<Object> response = ResponseEntity.ok().body(List.of(user));
+
+        when(userClient.getAll()).thenReturn(response);
 
         mvc.perform(get(URL)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -393,7 +403,9 @@ class UserControllerTest {
 
     @Test
     void getAll_whenUsersNotFound_thenReturnEmptyListAndStatusOk() throws Exception {
-        when(userService.getAll()).thenReturn(Collections.emptyList());
+        ResponseEntity<Object> response = ResponseEntity.ok().body(Collections.emptyList());
+
+        when(userClient.getAll()).thenReturn(response);
 
         mvc.perform(get(URL)
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -412,7 +424,7 @@ class UserControllerTest {
 
     @Test
     void delete_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        doThrow(new NotFoundException(USER_NOT_FOUND_ERROR)).when(userService).delete(1L);
+        when(userClient.deleteUser(1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(delete(PATH_VARIABLE_URL)
                         .characterEncoding(StandardCharsets.UTF_8)
