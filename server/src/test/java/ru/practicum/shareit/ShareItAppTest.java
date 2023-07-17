@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ShareItAppTest {
+class ShareItServerTest {
     @Test
     void testMain() {
-        ShareItApp.main(new String[] {});
+        ShareItServer.main(new String[] {});
         assertTrue(true);
     }
 }
