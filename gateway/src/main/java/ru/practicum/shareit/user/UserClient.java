@@ -25,7 +25,7 @@ public class UserClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(UserDto userDto) {
-        return post("", userDto);
+        return post(userDto);
     }
 
     public ResponseEntity<Object> update(Long userId, UserDto userDto) {

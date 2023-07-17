@@ -29,7 +29,7 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(Long userId, BookingItemIdAndTimeDto bookingItemIdAndTimeDto) {
-        return post("", userId, bookingItemIdAndTimeDto);
+        return post(userId, bookingItemIdAndTimeDto);
     }
 
     public ResponseEntity<Object> updateStatus(Long userId, Long bookingId, Boolean approved) {

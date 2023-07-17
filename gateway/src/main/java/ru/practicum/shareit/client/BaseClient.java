@@ -31,19 +31,16 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.GET, path, userId, parameters, null);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, T body) {
-        return post(path, null, null, body);
+    protected <T> ResponseEntity<Object> post(T body) {
+        return post("", null, body);
+    }
+
+    protected <T> ResponseEntity<Object> post(Long userId, T body) {
+        return post("", userId, body);
     }
 
     protected <T> ResponseEntity<Object> post(String path, Long userId, T body) {
-        return post(path, userId, null, body);
-    }
-
-    protected <T> ResponseEntity<Object> post(String path,
-                                              Long userId,
-                                              @Nullable Map<String, Object> parameters,
-                                              T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body);
+        return makeAndSendRequest(HttpMethod.POST, path, userId, null, body);
     }
 
     protected <T> ResponseEntity<Object> patch(String path, Long userId, T body) {

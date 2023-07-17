@@ -30,7 +30,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(Long userId, ItemRequestIdDto itemRequestIdDto) {
-        return post("", userId, itemRequestIdDto);
+        return post(userId, itemRequestIdDto);
     }
 
     public ResponseEntity<Object> update(Long userId, Long itemId, ItemDto itemDto) {
