@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -78,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
         foundItem.setOwner(user);
 
         if (!Objects.equals(foundItem.getOwner().getId(), userId)) {
-            throw new NotOwnerException("Пользователь с id " + userId + " не является " +
+            throw new NotFoundException("Пользователь с id " + userId + " не является " +
                     "владельцем предмета с id " + itemId);
         }
 
@@ -186,7 +185,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Предмет с id " + itemId + " не найден");
         }
         if (notOwns(userId, itemId)) {
-            throw new NotOwnerException("Пользователь с id " + userId + " не является " +
+            throw new NotFoundException("Пользователь с id " + userId + " не является " +
                     "владельцем предмета с id " + itemId);
         }
 
@@ -204,7 +203,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + userId + " не найден"));
 
         if (bookingRepository.countAllPrevious(itemId, userId) < 1) {
-            throw new NotAvailableException("Пользователь с id " + userId +
+            throw new BadRequestException("Пользователь с id " + userId +
                     " раньше не бронировал предмет с id " + itemId);
         }
 

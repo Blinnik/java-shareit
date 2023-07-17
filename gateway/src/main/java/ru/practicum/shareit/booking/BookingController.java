@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.common.exception.NotValidException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 
 import javax.validation.Valid;
@@ -31,11 +31,11 @@ public class BookingController {
         LocalDateTime end = bookingItemIdAndTimeDto.getEnd();
 
         if (start.isBefore(LocalDateTime.now())) {
-            throw new NotValidException("Время начала брони не может быть в прошлом");
+            throw new BadRequestException("Время начала брони не может быть в прошлом");
         } else if (end.isBefore(start)) {
-            throw new NotValidException("Время конца брони не может быть раньше времени начала");
+            throw new BadRequestException("Время конца брони не может быть раньше времени начала");
         } else if (start.equals(end)) {
-            throw new NotValidException("Время конца брони не может совпадать с временем начала");
+            throw new BadRequestException("Время конца брони не может совпадать с временем начала");
         }
 
         log.info("Создаем booking {}, userId={}", bookingItemIdAndTimeDto, userId);

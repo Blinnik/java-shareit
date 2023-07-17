@@ -1,7 +1,0 @@
-package ru.practicum.shareit.common.exception;
-
-public class NotAvailableException extends RuntimeException {
-    public NotAvailableException(String message) {
-        super(message);
-    }
-}

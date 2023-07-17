@@ -22,9 +22,8 @@ import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.model.dto.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.impl.BookingServiceImpl;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -126,15 +125,15 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_whenItemNotAvailable_thenThrowNotAvailableException() {
+    void create_whenItemNotAvailable_thenThrowBadRequestException() {
         Item returnedItem = itemBuilder.available(false).build();
 
         when(itemRepository.findByIdWithOwner(1L)).thenReturn(Optional.of(returnedItem));
 
-        NotAvailableException notAvailableException = assertThrows(NotAvailableException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> bookingService.create(1L, bookingItemIdAndTimeDto));
 
-        assertEquals("Предмет не доступен для брони", notAvailableException.getMessage());
+        assertEquals("Предмет не доступен для брони", badRequestException.getMessage());
         verify(itemRepository, times(1)).findByIdWithOwner(1L);
         verify(itemRepository, only()).findByIdWithOwner(1L);
         verifyNoMoreInteractions(itemRepository);
@@ -231,7 +230,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenUserNotOwner_thenThrowNotOwnerException() {
+    void updateStatus_whenUserNotOwner_thenThrowNotFoundException() {
         User itemOwner = userBuilder.id(100L).build();
         Item bookingItem = itemBuilder.owner(itemOwner).build();
         Booking returnedBooking = bookingBuilder.item(bookingItem).build();
@@ -239,7 +238,7 @@ class BookingServiceTest {
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(returnedBooking));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(bookingItem));
 
-        NotOwnerException notOwnerException = assertThrows(NotOwnerException.class,
+        NotFoundException notOwnerException = assertThrows(NotFoundException.class,
                 () -> bookingService.updateStatus(1L, 1L, true));
 
         assertEquals("Пользователь с id 1 не является владельцем вещи с id 1", notOwnerException.getMessage());
@@ -250,7 +249,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void updateStatus_whenActionRepeated_thenThrowNotAvailableException() {
+    void updateStatus_whenActionRepeated_thenThrowBadRequestException() {
         User itemOwner = userBuilder.build();
         Item bookingItem = itemBuilder.owner(itemOwner).build();
         Booking returnedBooking = bookingBuilder.status(BookingStatus.APPROVED).item(bookingItem).build();
@@ -258,10 +257,10 @@ class BookingServiceTest {
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(returnedBooking));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(bookingItem));
 
-        NotAvailableException notAvailableException = assertThrows(NotAvailableException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> bookingService.updateStatus(1L, 1L, true));
 
-        assertEquals("Нельзя повторно одобрить бронь", notAvailableException.getMessage());
+        assertEquals("Нельзя повторно одобрить бронь", badRequestException.getMessage());
         InOrder inOrder = inOrder(bookingRepository, itemRepository);
         inOrder.verify(bookingRepository, times(1)).findById(1L);
         inOrder.verify(itemRepository, times(1)).findById(1L);

@@ -17,9 +17,8 @@ import ru.practicum.shareit.booking.model.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.model.dto.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -51,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
         if (!item.getAvailable()) {
-            throw new NotAvailableException("Предмет не доступен для брони");
+            throw new BadRequestException("Предмет не доступен для брони");
         }
 
         // По тестам требуется выводить ошибку с кодом 404, а не 400, что, кмк, логичнее
@@ -83,14 +82,14 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Предмет с id " + itemId + " не найден"));
 
         if (!Objects.equals(item.getOwner().getId(), userId)) {
-            throw new NotOwnerException("Пользователь с id " + userId + " не является владельцем вещи с id " + itemId);
+            throw new NotFoundException("Пользователь с id " + userId + " не является владельцем вещи с id " + itemId);
         }
 
         if (booking.getStatus().equals(APPROVED) && approved ||
                 booking.getStatus().equals(REJECTED) && !approved) {
             String message = approved ? "одобрить" : "отклонить";
 
-            throw new NotAvailableException("Нельзя повторно " + message + " бронь");
+            throw new BadRequestException("Нельзя повторно " + message + " бронь");
         }
 
         if (approved) {

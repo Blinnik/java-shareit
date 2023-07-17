@@ -14,9 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingItemIdAndTimeDto;
 import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.user.dto.ItemBookerDto;
 
@@ -170,7 +169,7 @@ class BookingControllerTest {
     @Test
     void create_whenItemNotAvailable_thenReturnErrorAndStatusBadRequest() throws Exception {
         when(bookingClient.create(1L, bookingItemIdAndTimeDto))
-                .thenThrow(new NotAvailableException("Предмет не доступен для брони"));
+                .thenThrow(new BadRequestException("Предмет не доступен для брони"));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(post(URL)
@@ -351,7 +350,7 @@ class BookingControllerTest {
         String approvedParam = "?approved=false";
 
         when(bookingClient.updateStatus(1L, 1L, false))
-                .thenThrow(new NotOwnerException(NOT_OWNER_ERROR));
+                .thenThrow(new NotFoundException(NOT_OWNER_ERROR));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(patch(PATH_VARIABLE_URL + approvedParam)
@@ -369,7 +368,7 @@ class BookingControllerTest {
         String approvedParam = "?approved=true";
 
         when(bookingClient.updateStatus(1L, 1L, true))
-                .thenThrow(new NotAvailableException("Нельзя повторно одобрить бронь"));
+                .thenThrow(new BadRequestException("Нельзя повторно одобрить бронь"));
 
         String json = mapper.writeValueAsString(bookingItemIdAndTimeDto);
         mvc.perform(patch(PATH_VARIABLE_URL + approvedParam)

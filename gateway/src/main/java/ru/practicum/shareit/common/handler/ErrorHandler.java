@@ -8,26 +8,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.shareit.common.exception.NotAvailableException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
-import ru.practicum.shareit.common.exception.NotValidException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 
 import javax.validation.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler({NotFoundException.class,
-            NotOwnerException.class})
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({ValidationException.class,
-            NotValidException.class,
-            NotAvailableException.class,
+            BadRequestException.class,
             BindException.class,
             MethodArgumentNotValidException.class,
             MethodArgumentTypeMismatchException.class})

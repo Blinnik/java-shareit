@@ -5,7 +5,9 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -13,9 +15,8 @@ import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -253,7 +254,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void update_whenUserNotOwner_thenThrowNotOwnerException() {
+    void update_whenUserNotOwner_thenThrowNotFoundException() {
         ItemDto itemDto = itemDtoBuilder.build();
 
         User owner = userBuilder.id(100L).build();
@@ -262,7 +263,7 @@ class ItemServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(returnedItem));
 
-        NotOwnerException userNotOwnerException = assertThrows(NotOwnerException.class,
+        NotFoundException userNotOwnerException = assertThrows(NotFoundException.class,
                 () -> itemService.update(1L, 1L, itemDto));
 
         assertEquals("Пользователь с id 1 не является владельцем предмета с id 1",
@@ -494,7 +495,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void delete_whenUserNotOwner_thenThrowNotOwnerException() {
+    void delete_whenUserNotOwner_thenThrowNotFoundException() {
         Item returnedItem = itemBuilder
                 .owner(userBuilder.id(2L).build())
                 .build();
@@ -503,7 +504,7 @@ class ItemServiceTest {
         when(itemRepository.existsById(1L)).thenReturn(true);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(returnedItem));
 
-        NotOwnerException itemNotOwnerException = assertThrows(NotOwnerException.class,
+        NotFoundException itemNotOwnerException = assertThrows(NotFoundException.class,
                 () -> itemService.delete(1L, 1L));
 
         assertEquals("Пользователь с id 1 не является владельцем предмета с id 1",
@@ -577,16 +578,16 @@ class ItemServiceTest {
     }
 
     @Test
-    void createComment_whenUserHasNotBookedBefore_thenThrowNotAvailableException() {
+    void createComment_whenUserHasNotBookedBefore_thenThrowBadRequestException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(userBuilder.build()));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(itemBuilder.build()));
         when(bookingRepository.countAllPrevious(1L, 1L)).thenReturn(0);
 
-        NotAvailableException notAvailableException = assertThrows(NotAvailableException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> itemService.createComment(1L, 1L, commentTextDto));
 
         assertEquals("Пользователь с id 1 раньше не бронировал предмет с id 1",
-                notAvailableException.getMessage());
+                badRequestException.getMessage());
         InOrder inOrder = inOrder(userRepository, itemRepository, bookingRepository);
         inOrder.verify(userRepository, times(1)).findById(1L);
         inOrder.verify(itemRepository, times(1)).findById(1L);

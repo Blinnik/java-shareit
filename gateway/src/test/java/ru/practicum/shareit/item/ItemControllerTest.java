@@ -13,9 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingBookerIdDto;
-import ru.practicum.shareit.common.exception.NotAvailableException;
+import ru.practicum.shareit.common.exception.BadRequestException;
 import ru.practicum.shareit.common.exception.NotFoundException;
-import ru.practicum.shareit.common.exception.NotOwnerException;
 import ru.practicum.shareit.common.model.PaginationConfig;
 import ru.practicum.shareit.item.dto.*;
 
@@ -473,7 +472,7 @@ class ItemControllerTest {
     @Test
     void update_whenUserNotOwner_thenReturnErrorAndStatusNotFound() throws Exception {
         when(itemClient.update(1L, 1L, itemDto))
-                .thenThrow(new NotOwnerException(NOT_OWNER_ERROR));
+                .thenThrow(new NotFoundException(NOT_OWNER_ERROR));
 
         String json = mapper.writeValueAsString(itemRequestIdDto);
         mvc.perform(patch(PATH_VARIABLE_URL)
@@ -871,7 +870,7 @@ class ItemControllerTest {
     @Test
     void createComment_whenUserNotBooker_thenReturnErrorAndStatusBadRequest() throws Exception {
         when(itemClient.createComment(1L, 1L, commentTextDto))
-                .thenThrow(new NotAvailableException("Пользователь с id 1 раньше не бронировал предмет с id 1"));
+                .thenThrow(new BadRequestException("Пользователь с id 1 раньше не бронировал предмет с id 1"));
 
         String json = mapper.writeValueAsString(commentTextDto);
         mvc.perform(post(COMMENT_URL)
