@@ -82,14 +82,14 @@ class ItemServiceIntegrationTest {
         // Создаем бронирование
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(
                 itemRequestIdDto4.getId(),
-                LocalDateTime.now().minusDays(1).toString(),
-                LocalDateTime.now().plusDays(1).toString()
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1)
         );
 
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto2 = new BookingItemIdAndTimeDto(
                 itemRequestIdDto.getId(),
-                LocalDateTime.now().plusDays(10).toString(),
-                LocalDateTime.now().plusDays(20).toString()
+                LocalDateTime.now().plusDays(10),
+                LocalDateTime.now().plusDays(20)
         );
 
         BookingDto bookingDto = bookingService.create(user1Id, bookingItemIdAndTimeDto);
