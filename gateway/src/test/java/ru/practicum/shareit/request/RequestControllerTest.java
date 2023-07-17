@@ -10,14 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.common.exception.NotFoundException;
 import ru.practicum.shareit.common.model.PaginationConfig;
-import ru.practicum.shareit.item.model.dto.ItemRequestIdDto;
-import ru.practicum.shareit.request.model.dto.RequestDescriptionDto;
-import ru.practicum.shareit.request.model.dto.RequestDto;
-import ru.practicum.shareit.request.model.dto.RequestItemsDto;
-import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.item.dto.ItemRequestIdDto;
+import ru.practicum.shareit.request.dto.RequestDescriptionDto;
+import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestItemsDto;
+
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ class RequestControllerTest {
     ObjectMapper mapper;
 
     @MockBean
-    RequestService requestService;
+    RequestClient requestClient;
 
     @Autowired
     MockMvc mvc;
@@ -74,7 +75,9 @@ class RequestControllerTest {
 
     @Test
     void create_whenItemRequestIdDtoCorrectAndUserFound_thenReturnRequestDtoAndStatusOk() throws Exception {
-        when(requestService.create(1L, requestDescriptionDto)).thenReturn(requestDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(requestDto);
+
+        when(requestClient.create(1L, requestDescriptionDto)).thenReturn(response);
 
         String json = mapper.writeValueAsString(requestDescriptionDto);
         mvc.perform(post(URL)
@@ -92,7 +95,7 @@ class RequestControllerTest {
 
     @Test
     void create_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(requestService.create(1L, requestDescriptionDto))
+        when(requestClient.create(1L, requestDescriptionDto))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         String json = mapper.writeValueAsString(requestDescriptionDto);
@@ -160,7 +163,9 @@ class RequestControllerTest {
 
     @Test
     void getOwn_whenUserAndRequestsFound_thenReturnListOfRequestsAndStatusOk() throws Exception {
-        when(requestService.getOwn(1L)).thenReturn(List.of(requestItemsDto));
+        ResponseEntity<Object> response = ResponseEntity.ok().body(List.of(requestItemsDto));
+
+        when(requestClient.getOwn(1L)).thenReturn(response);
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -176,7 +181,9 @@ class RequestControllerTest {
 
     @Test
     void getOwn_whenUserFoundAndRequestsNotFound_thenReturnEmptyListAndStatusOk() throws Exception {
-        when(requestService.getOwn(1L)).thenReturn(Collections.emptyList());
+        ResponseEntity<Object> response = ResponseEntity.ok().body(Collections.emptyList());
+
+        when(requestClient.getOwn(1L)).thenReturn(response);
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -188,7 +195,7 @@ class RequestControllerTest {
 
     @Test
     void getOwn_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(requestService.getOwn(1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
+        when(requestClient.getOwn(1L)).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -200,8 +207,10 @@ class RequestControllerTest {
 
     @Test
     void getAll_whenUserAndRequestsFound_thenReturnListOfRequestsAndStatusOk() throws Exception {
-        when(requestService.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
-                .thenReturn(List.of(requestItemsDto));
+        ResponseEntity<Object> response = ResponseEntity.ok().body(List.of(requestItemsDto));
+
+        when(requestClient.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(ALL_REQUESTS_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -218,8 +227,10 @@ class RequestControllerTest {
 
     @Test
     void getAll_whenUserFoundAndRequestsNotFound_thenReturnEmptyListAndStatusOk() throws Exception {
-        when(requestService.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
-                .thenReturn(Collections.emptyList());
+        ResponseEntity<Object> response = ResponseEntity.ok().body(Collections.emptyList());
+
+        when(requestClient.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+                .thenReturn(response);
 
         mvc.perform(get(ALL_REQUESTS_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -231,7 +242,7 @@ class RequestControllerTest {
 
     @Test
     void getAll_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(requestService.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
+        when(requestClient.getAll(anyLong(), ArgumentMatchers.any(PaginationConfig.class)))
                 .thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(ALL_REQUESTS_URL)
@@ -268,7 +279,9 @@ class RequestControllerTest {
 
     @Test
     void getById_whenUserAndRequestFound_thenReturnRequestAndStatusOk() throws Exception {
-        when(requestService.getById(anyLong(), anyLong())).thenReturn(requestItemsDto);
+        ResponseEntity<Object> response = ResponseEntity.ok().body(requestItemsDto);
+
+        when(requestClient.getById(anyLong(), anyLong())).thenReturn(response);
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -285,7 +298,7 @@ class RequestControllerTest {
 
     @Test
     void getById_whenRequestNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(requestService.getById(anyLong(), anyLong())).thenThrow(new NotFoundException(REQUEST_NOT_FOUND_ERROR));
+        when(requestClient.getById(anyLong(), anyLong())).thenThrow(new NotFoundException(REQUEST_NOT_FOUND_ERROR));
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)
@@ -297,7 +310,7 @@ class RequestControllerTest {
 
     @Test
     void getById_whenUserNotFound_thenReturnErrorAndStatusNotFound() throws Exception {
-        when(requestService.getById(anyLong(), anyLong())).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
+        when(requestClient.getById(anyLong(), anyLong())).thenThrow(new NotFoundException(USER_NOT_FOUND_ERROR));
 
         mvc.perform(get(PATH_VARIABLE_URL)
                         .header("X-Sharer-User-Id", 1L)

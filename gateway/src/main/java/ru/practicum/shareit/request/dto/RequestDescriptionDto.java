@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.model.dto;
+package ru.practicum.shareit.request.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
