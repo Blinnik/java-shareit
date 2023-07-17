@@ -1,0 +1,12 @@
+shareit-server:
+  url: ${SHAREIT_SERVER_URL}
+
+logging:
+  level:
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.apache.http: DEBUG
+    httpclient.wire: DEBUG
+
+
+
+
