@@ -32,7 +32,3 @@ spring:
     url: jdbc:h2:./db/shareit
     username: test
     password: test
-
-
-
-
