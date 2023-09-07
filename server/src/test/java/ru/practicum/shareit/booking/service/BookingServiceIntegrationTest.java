@@ -35,7 +35,6 @@ class BookingServiceIntegrationTest {
 
     @Test
     void getAllByBookerId() {
-        // Создаем владельца вещей и сами вещи
         UserDto userDto = UserDto.builder().name("test").email("test@mail.com").build();
         User owner = userService.create(userDto);
         Long ownerId = owner.getId();
@@ -55,7 +54,6 @@ class BookingServiceIntegrationTest {
         itemRequestIdDto = itemService.create(ownerId, itemRequestIdDto);
         itemRequestIdDto2 = itemService.create(ownerId, itemRequestIdDto2);
 
-        // Создаем пользователей, которые будут брать в аренду вещи
         UserDto userDto2 = UserDto.builder().name("test2").email("test2@mail.com").build();
         User booker = userService.create(userDto2);
         Long bookerId = booker.getId();
@@ -64,7 +62,6 @@ class BookingServiceIntegrationTest {
         User booker2 = userService.create(userDto3);
         Long booker2Id = booker2.getId();
 
-        // Создаем брони
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(
                 itemRequestIdDto.getId(),
                 LocalDateTime.now().plusDays(1),
@@ -90,7 +87,6 @@ class BookingServiceIntegrationTest {
         List<BookingDto> expectedBookingDtoListOfBooker1 =
                 bookingService.getAllByBookerId(bookerId, BookingState.ALL, paginationConfig);
 
-        // Меняем статус
         bookingService.updateStatus(ownerId, bookingDto.getId(), true);
 
         List<BookingDto> expectedBookingDtoListOfBooker1WhenStatusUpdated =

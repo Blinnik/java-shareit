@@ -39,8 +39,8 @@ public class QCommentTest {
     Comment comment2;
     Comment comment3;
 
-    // QComment нигде не используется, но генерируется автоматически QueryDSL, из-за чего страдает покрытие
-    // Поэтому я добавил тесты для проверки функциональности QComment
+    // QComment is not used anywhere, but is generated automatically by QueryDSL, which is why the coverage suffers
+    // So I added tests to test the functionality of QComment
     @BeforeEach
     void setUp() {
         User itemOwner = User.builder().name("owner").email("owner@mail.com").build();

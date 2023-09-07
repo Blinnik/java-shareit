@@ -39,7 +39,6 @@ class ItemServiceIntegrationTest {
     @Test
     void getAllByOwnerId_whenUserFound_thenReturnUserItems() {
         // GIVEN
-        // Создаем пользователей
         UserDto userDto = UserDto.builder().name("test").email("test@mail.com").build();
         UserDto userDto2 = UserDto.builder().name("test2").email("test2@mail.com").build();
         User user = userService.create(userDto);
@@ -47,7 +46,6 @@ class ItemServiceIntegrationTest {
         Long user1Id = user.getId();
         Long user2Id = user2.getId();
 
-        // Создаем предметы для пользователя 1
         ItemRequestIdDto itemRequestIdDto = ItemRequestIdDto.builder()
                 .name("test item name")
                 .description("test item description")
@@ -63,7 +61,6 @@ class ItemServiceIntegrationTest {
         itemRequestIdDto = itemService.create(user1Id, itemRequestIdDto);
         itemRequestIdDto2 = itemService.create(user1Id, itemRequestIdDto2);
 
-        // Создаем предметы для пользователя 2
         ItemRequestIdDto itemRequestIdDto3 = ItemRequestIdDto.builder()
                 .name("test item name3")
                 .description("test item description3")
@@ -79,7 +76,6 @@ class ItemServiceIntegrationTest {
         itemRequestIdDto3 = itemService.create(user2Id, itemRequestIdDto3);
         itemRequestIdDto4 = itemService.create(user2Id, itemRequestIdDto4);
 
-        // Создаем бронирование
         BookingItemIdAndTimeDto bookingItemIdAndTimeDto = new BookingItemIdAndTimeDto(
                 itemRequestIdDto4.getId(),
                 LocalDateTime.now().minusDays(1),
@@ -145,7 +141,6 @@ class ItemServiceIntegrationTest {
     @Test
     void getAllByTextQuery_whenUserFound_thenReturnSearchableItems() {
         // GIVEN
-        // Создаем пользователей
         UserDto userDto = UserDto.builder().name("test").email("test@mail.com").build();
         UserDto userDto2 = UserDto.builder().name("test2").email("test2@mail.com").build();
         User user = userService.create(userDto);
@@ -153,7 +148,6 @@ class ItemServiceIntegrationTest {
         Long user1Id = user.getId();
         Long user2Id = user2.getId();
 
-        // Создаем предметы для пользователя 1
         ItemRequestIdDto itemRequestIdDto = ItemRequestIdDto.builder()
                 .name("Дрель")
                 .description("test item description")
@@ -169,7 +163,6 @@ class ItemServiceIntegrationTest {
         itemRequestIdDto = itemService.create(user1Id, itemRequestIdDto);
         itemService.create(user1Id, itemRequestIdDto2);
 
-        // Создаем предметы для пользователя 2
         ItemRequestIdDto itemRequestIdDto3 = ItemRequestIdDto.builder()
                 .name("Пылесос")
                 .description("test item description3")

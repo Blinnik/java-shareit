@@ -53,7 +53,6 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("Предмет не доступен для брони");
         }
 
-        // По тестам требуется выводить ошибку с кодом 404, а не 400, что, кмк, логичнее
         if (Objects.equals(item.getOwner().getId(), userId)) {
             throw new NotFoundException("Пользователь не может забронировать собственный предмет");
         }
